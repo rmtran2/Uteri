@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Uteri</string>
-    <string name="Calander">Calander</string>
+    <string name="Calendar">Calendar</string>
     <string name="Resource_Map">Resource Map</string>
     <string name="Timer">Timer</string>
     <string name="Profile">Profile</string>
