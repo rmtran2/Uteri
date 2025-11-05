@@ -32,7 +32,12 @@ fun HomePage(
     onNavigateToCalendar: () -> Unit,
     onNavigateToMap: () -> Unit,
     onNavigateToTimer: () -> Unit,
+    onNavigateToProfile: () -> Unit,
     modifier: Modifier = Modifier) {
+    Row(horizontalArrangement = Arrangement.Start,
+        modifier = Modifier.padding(24.dp)){
+        ProfileButton(onNavigateToProfile = onNavigateToProfile)
+    }
     Box(
         contentAlignment = Alignment.TopCenter,
         modifier = Modifier.fillMaxSize(),
