@@ -30,7 +30,7 @@ import java.util.Locale
 
 @Composable
 fun CalendarScreen(
-    modifier: Modifier
+    onNavigateBack: () -> Unit
 ) {
     Scaffold (
         bottomBar = {
@@ -127,5 +127,4 @@ private fun CalendarPreview() {
         }
     }
 }
-
 
