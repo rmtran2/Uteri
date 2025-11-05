@@ -22,16 +22,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cs407.uteri.data.ProfileSettingsStorage
+import com.cs407.uteri.ui.utils.Navbar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun ProfileSettingsScreen() {
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Profile Settings") } ) },
-        bottomBar = { BottomNavBar() }
+        topBar = { CenterAlignedTopAppBar(title = { Text("Profile Settings", fontWeight = FontWeight.Bold, fontSize = 36.sp) } ) },
+        bottomBar = { Navbar() }
     ) {innerPadding ->
         ProfileSettings(modifier = Modifier.padding(innerPadding))
     }
@@ -42,9 +44,9 @@ fun ProfileSettings(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-//    val store = ProfileSettingsStorage(LocalContext.current)
-//    val profileSettings = store.profileSettingsFlow.collectAsStateWithLifecycle(ProfileSettings())
-//    val scope = rememberCoroutineScope()
+    val store = ProfileSettingsStorage(context)
+    val profileSettings = store.profileSettingsFlow.collectAsStateWithLifecycle(ProfileSettings())
+    val scope = rememberCoroutineScope()
 
     Column(modifier = modifier) {
         Spacer(Modifier.padding(50.dp))
@@ -63,6 +65,23 @@ fun ProfileSettings(
                 checked = false,
                 onCheckedChange = {  },
             )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+
+            ) {
+                Text(text = "Online Mode", fontWeight = FontWeight.Bold)
+                Text(text = "Store your data on the cloud for easy syncing")
+            }
+            Switch(
+                checked = false,
+                onCheckedChange = {  },
+            )
+
         }
     }
 

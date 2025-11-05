@@ -5,10 +5,10 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStore
-import com.cs407.uteri.ui.screen.ProfileSettings
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
 data class ProfileSettings (
@@ -26,7 +26,9 @@ class ProfileSettingsStorage(private val context: Context) {
         }
     }
 
-    val profileSettingsFlow: Flow<ProfileSettings> = context.dataStore.data.map { settings ->
+    val profileSettingsFlow: Flow<ProfileSettings> = context.dataStore.data
+        .catch { emit(emptyPreferences()) }
+        .map { settings ->
         val passwordEnabled = settings[PreferenceKeys.PASSWORD_ENABLED] ?: false
         val offlineMode = settings[PreferenceKeys.OFFLINE_MODE] ?: false
 
