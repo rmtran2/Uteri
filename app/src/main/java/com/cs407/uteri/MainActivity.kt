@@ -1,5 +1,6 @@
 package com.cs407.uteri
 
+import com.cs407.uteri.ui.screen.HomePage
 import android.R.attr.text
 import android.os.Bundle
 import android.provider.Settings.Global.getString
@@ -36,98 +37,48 @@ import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.cs407.uteri.ui.screen.CalendarScreen
+import com.cs407.uteri.ui.screen.HomePage
+import com.cs407.uteri.ui.screen.ResourceMapScreen
+import com.cs407.uteri.ui.screen.TimerScreen
 import org.intellij.lang.annotations.JdkConstants
 
+// MainActivity is the entry point of the application
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Enables drawing behind system bars for a full-screen look
         enableEdgeToEdge()
+        // Sets the UI content for this Activity using Jetpack Compose
         setContent {
-            UteriTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HomePage(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+            // Applies the app's theme
+                // Calls the AppNavigation composable to set up navigation
+                AppNavigation()
         }
     }
 }
 
 @Composable
-fun HomePage(name: String, modifier: Modifier = Modifier) {
-    Box(
-        contentAlignment = Alignment.TopCenter,
-        modifier = Modifier.fillMaxSize(),
+fun AppNavigation(){
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = "home"
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.uteruslogo),
-                contentDescription = "Logo",
-                modifier = Modifier.size(250.dp)
+        composable("home") {
+            HomePage(
+                onNavigateToCalendar = {navController.navigate("calendar_screen")},
+                onNavigateToMap = {navController.navigate("map_screen")},
+                onNavigateToTimer = {navController.navigate("timer_screen")},
             )
-            Button(
-                onClick = {},
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(id = R.color.pink)
-                ),
-                modifier = Modifier.fillMaxWidth().padding(start=32.dp, end=32.dp).height(94.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                   Image(
-                       painter = painterResource(id = R.drawable.calendar_icon),
-                       contentDescription = "Calendar",
-                       modifier = Modifier.size(40.dp)
-                   )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(
-                    ) {
-                       Text(text = stringResource(R.string.Calendar), fontSize = 18.sp)
-                       Text(text = "Log your period")
-                    }
-                }
-            }
-            Spacer(modifier.height(2.dp))
-            Button(
-                onClick = {},
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(id = R.color.pink)
-                ),
-                modifier = Modifier.fillMaxWidth().padding(start=32.dp, end=32.dp).height(94.dp)
-            ) {
-            }
-            Spacer(modifier.height(2.dp))
-            Button(
-                onClick = {},
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(id = R.color.pink)
-                ),
-                modifier = Modifier.fillMaxWidth().padding(start=32.dp, end=32.dp).height(94.dp)
-            ) {
-            }
-
-
-
         }
-
+        composable("calendar_screen") { CalendarScreen ({navController.navigate("home")}) }
+        composable("map_screen") { ResourceMapScreen ({ navController.navigate("home") }) }
+        composable("timer_screen") { TimerScreen ({ navController.navigate("home") }) }
     }
-}
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    UteriTheme {
-        HomePage("Android")
-    }
 }
