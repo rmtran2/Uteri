@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import com.cs407.uteri.ui.theme.UteriTheme
 import com.cs407.uteri.ui.utils.Navbar
 import java.time.LocalDate
@@ -30,11 +31,12 @@ import java.util.Locale
 
 @Composable
 fun CalendarScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    navController: NavController
 ) {
     Scaffold (
         bottomBar = {
-            Navbar()
+            Navbar(navController)
         }
     ) { padding ->
         Calendar(
@@ -105,26 +107,6 @@ private fun CalendarCell(
             text = date.dayOfMonth.toString(),
             modifier = Modifier.align(Alignment.Center)
         )
-    }
-}
-
-private fun Int.getDayOfWeek3Letters(): String? = Calendar.getInstance().apply {
-    set(Calendar.DAY_OF_WEEK, this@getDayOfWeek3Letters)
-}.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault())
-
-@Preview
-@Composable
-private fun CalendarPreview() {
-    UteriTheme {
-        Scaffold (
-            bottomBar = {
-                Navbar()
-            }
-        ) { padding ->
-            Calendar(
-                modifier = Modifier.padding(padding)
-            )
-        }
     }
 }
 
