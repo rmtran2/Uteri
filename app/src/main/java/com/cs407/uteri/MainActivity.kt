@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cs407.uteri.ui.screen.CalendarScreen
 import com.cs407.uteri.ui.screen.HomePage
-import com.cs407.uteri.ui.screen.ProfileSetingsScreen
+import com.cs407.uteri.ui.screen.ProfileSettingsScreen
 import com.cs407.uteri.ui.screen.ResourceMapScreen
 import com.cs407.uteri.ui.screen.TimerScreen
 import com.cs407.uteri.ui.theme.UteriTheme
@@ -47,7 +47,7 @@ fun AppNavigation(){
         composable("calendar_screen") { CalendarScreen ({navController.navigate("home")}) }
         composable("map_screen") { ResourceMapScreen ({ navController.navigate("home") }) }
         composable("timer_screen") { TimerScreen ({ navController.navigate("home") }) }
-        composable("profile_screen") { ProfileSetingsScreen ({ navController.navigate("home") }) }
+        composable("profile_screen") { ProfileSettingsScreen ({ navController.navigate("home") }) }
     }
 
 }
