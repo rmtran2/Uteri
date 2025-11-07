@@ -1,11 +1,13 @@
 package com.cs407.uteri.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import com.cs407.uteri.ui.theme.Typography
 import com.cs407.uteri.ui.theme.UteriTheme
 import com.cs407.uteri.ui.utils.Navbar
 import java.time.LocalDate
@@ -39,9 +42,19 @@ fun CalendarScreen(
             Navbar(navController)
         }
     ) { padding ->
-        Calendar(
-            modifier = Modifier.padding(padding)
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Calendar",
+                style = MaterialTheme.typography.headlineMedium
+            )
+            Calendar()
+        }
     }
 }
 
