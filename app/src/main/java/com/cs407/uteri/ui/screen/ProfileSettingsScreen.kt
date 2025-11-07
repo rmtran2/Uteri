@@ -9,9 +9,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -43,7 +47,16 @@ fun ProfileSettingsScreen(
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = {
+            CenterAlignedTopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null
+                        )
+                    }
+                },
+                title = {
                 Text(
                     "Profile Settings",
                     fontWeight = FontWeight.Bold,
@@ -105,10 +118,13 @@ fun ProfileSettings1(
 
         }
 
+        Spacer(Modifier.padding(16.dp))
+
         ElevatedCard {
             Text(
                 text = "Login",
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             OutlinedTextField(
                 value = email,
@@ -129,7 +145,7 @@ fun ProfileSettings1(
         Image(
             painter = painterResource(id = R.drawable.uteruslogo),
             contentDescription = "Logo",
-            modifier = Modifier.size(250.dp)
+            modifier = Modifier.size(250.dp).align(Alignment.CenterHorizontally)
         )
     }
 
