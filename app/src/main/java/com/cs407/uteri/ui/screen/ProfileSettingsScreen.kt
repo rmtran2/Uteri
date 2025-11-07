@@ -17,7 +17,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,14 +25,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.cs407.uteri.R
 import com.cs407.uteri.data.ProfileSettingsStorage
 import com.cs407.uteri.ui.utils.Navbar
@@ -41,18 +38,27 @@ import com.cs407.uteri.ui.utils.Navbar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileSettingsScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    navController: NavController
 ) {
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Profile Settings", fontWeight = FontWeight.Bold, fontSize = 36.sp) } ) },
-        bottomBar = { Navbar() }
-    ) {innerPadding ->
-        ProfileSettings(modifier = Modifier.padding(innerPadding))
+        topBar = {
+            CenterAlignedTopAppBar(title = {
+                Text(
+                    "Profile Settings",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 36.sp
+                )
+            })
+        },
+        bottomBar = { Navbar(navController) }
+    ) { innerPadding ->
+        ProfileSettings1(modifier = Modifier.padding(innerPadding))
     }
 }
 
 @Composable
-fun ProfileSettings(
+fun ProfileSettings1(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current

@@ -15,7 +15,6 @@ import com.cs407.uteri.ui.screen.ResourceMapScreen
 import com.cs407.uteri.ui.screen.TimerScreen
 import com.cs407.uteri.ui.theme.UteriTheme
 
-// MainActivity is the entry point of the application
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,20 +33,37 @@ fun AppNavigation(){
 
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = Screen.HOME.route
     ) {
-        composable("home") {
+        composable(Screen.HOME.route) {
             HomePage(
-                onNavigateToCalendar = {navController.navigate("calendar_screen")},
-                onNavigateToMap = {navController.navigate("map_screen")},
-                onNavigateToTimer = {navController.navigate("timer_screen")},
-                onNavigateToProfile = {navController.navigate("profile_screen")},
+                onNavigateToCalendar = {navController.navigate(Screen.CALENDAR.route)},
+                onNavigateToMap = {navController.navigate(Screen.MAP.route)},
+                onNavigateToTimer = {navController.navigate(Screen.TIMER.route)},
+                onNavigateToProfile = {navController.navigate(Screen.PROFILE.route)},
             )
         }
-        composable("calendar_screen") { CalendarScreen ({navController.navigate("home")}) }
-        composable("map_screen") { ResourceMapScreen ({ navController.navigate("home") }) }
-        composable("timer_screen") { TimerScreen ({ navController.navigate("home") }) }
-        composable("profile_screen") { ProfileSettingsScreen ({ navController.navigate("home") }) }
+        composable(Screen.CALENDAR.route) {
+            CalendarScreen ({navController.navigate("home")}, navController)
+        }
+        composable(Screen.MAP.route) {
+            ResourceMapScreen ({ navController.navigate("home")}, navController)
+        }
+        composable(Screen.TIMER.route) {
+            TimerScreen ({ navController.navigate("home") }, navController)
+        }
+        composable(Screen.PROFILE.route) {
+            ProfileSettingsScreen ({ navController.navigate("home") }, navController)
+        }
+
     }
 
+}
+
+enum class Screen(val route: String) {
+    HOME("home"),
+    CALENDAR("calendar"),
+    TIMER("timer"),
+    MAP("map"),
+    PROFILE("profile")
 }
