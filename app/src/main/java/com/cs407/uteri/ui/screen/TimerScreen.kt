@@ -139,8 +139,8 @@ fun TimerScreen(
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 32.dp)) {
                 Text(
                     text = "Defaults:",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(bottom = 8.dp),
+                    fontSize = 25.sp,
+                    modifier = Modifier.padding(bottom = 10.dp),
                     textAlign = TextAlign.Center
                 )
                 Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
@@ -148,10 +148,10 @@ fun TimerScreen(
                         Button(
                             onClick = { startTimer(hrs, 0) },
                             shape = CircleShape,
-                            modifier = Modifier.size(64.dp),
+                            modifier = Modifier.size(70.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.pink))
                         ) {
-                            Text("$hrs h", fontSize = 18.sp)
+                            Text("$hrs h", fontSize = 16.sp)
                         }
                         Spacer(modifier = Modifier.width(24.dp))
                     }
@@ -192,7 +192,7 @@ fun TimerScreen(
                     .height(56.dp)
                     .width(180.dp)
             ) {
-                Text(if (isRunning) "Stop" else "Start", fontSize = 20.sp)
+                Text(if (isRunning) "stop" else "start", fontSize = 20.sp)
             }
         }
     }
