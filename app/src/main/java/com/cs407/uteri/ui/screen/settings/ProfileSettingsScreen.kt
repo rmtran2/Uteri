@@ -1,15 +1,20 @@
 package com.cs407.uteri.ui.screen.settings
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +34,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -75,7 +84,21 @@ fun ProfileSettingsScreen(
         },
         bottomBar = { Navbar(navController) }
     ) { innerPadding ->
-        ProfileSettings1(viewModel, modifier = Modifier.padding(innerPadding))
+        Box(
+            modifier = Modifier.fillMaxSize().background(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFFE0E0E0),
+                        Color(0x2CE91E63)
+                    ),
+                    center = Offset(500f, 700f),
+                    radius = 1000f,
+                    tileMode = TileMode.Clamp
+                )
+            )
+        ) {
+            ProfileSettings1(viewModel, modifier = Modifier.padding(innerPadding))
+        }
     }
 }
 
@@ -92,7 +115,7 @@ fun ProfileSettings1(
     Column(modifier = modifier) {
         Spacer(Modifier.padding(50.dp))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -107,8 +130,9 @@ fun ProfileSettings1(
                 onCheckedChange = { viewModel.togglePasswordProtected(it) },
             )
         }
+        Spacer(Modifier.padding(16.dp))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -119,38 +143,45 @@ fun ProfileSettings1(
                 Text(text = "Store your data on the cloud for easy syncing")
             }
             Switch(
-                checked = false,
-                onCheckedChange = { viewModel.togglePasswordProtected(it) },
+                checked = profileSettings.offlineMode,
+                onCheckedChange = { viewModel.toggleOfflineData(it) },
             )
 
         }
 
         Spacer(Modifier.padding(16.dp))
 
-        ElevatedCard {
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = Color(0xFFFFF0F5)
+            ),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp)
+        ) {
             Text(
                 text = "Login",
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier.align(Alignment.CenterHorizontally).padding(8.dp)
             )
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(8.dp)
             )
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Password") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(8.dp)
             )
         }
 
         Spacer(Modifier.padding(16.dp))
 
         Image(
-            painter = painterResource(id = R.drawable.uteruslogo),
+            painter = painterResource(id = R.drawable.new_logo),
             contentDescription = "Logo",
             modifier = Modifier.size(250.dp).align(Alignment.CenterHorizontally)
         )

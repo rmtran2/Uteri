@@ -2,7 +2,6 @@ package com.cs407.uteri.ui.screen.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.cs407.uteri.data.ProfileSettings
 import com.cs407.uteri.data.ProfileSettingsStorage
@@ -21,6 +20,12 @@ class ProfileSettingsViewModel(
     fun togglePasswordProtected(enabled: Boolean) {
         viewModelScope.launch {
             preferencesManager.savePasswordSetting(enabled)
+        }
+    }
+
+    fun toggleOfflineData(offlineMode: Boolean) {
+        viewModelScope.launch {
+            preferencesManager.saveOfflineSetting(offlineMode)
         }
     }
 }
