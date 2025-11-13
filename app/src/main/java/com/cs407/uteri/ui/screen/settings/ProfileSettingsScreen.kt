@@ -1,6 +1,5 @@
-package com.cs407.uteri.ui.screen
+package com.cs407.uteri.ui.screen.settings
 
-import android.widget.ToggleButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,17 +34,26 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cs407.uteri.R
+import com.cs407.uteri.data.ProfileSettings
 import com.cs407.uteri.data.ProfileSettingsStorage
 import com.cs407.uteri.ui.utils.Navbar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileSettingsScreen(
+    profileSettingsManager: ProfileSettingsStorage,
     onNavigateBack: () -> Unit,
     navController: NavController
 ) {
+
+    val viewModel: ProfileSettingsViewModel = viewModel(
+        factory = ProfileSettingsViewModelFactory(profileSettingsManager)
+    )
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -66,18 +75,16 @@ fun ProfileSettingsScreen(
         },
         bottomBar = { Navbar(navController) }
     ) { innerPadding ->
-        ProfileSettings1(modifier = Modifier.padding(innerPadding))
+        ProfileSettings1(viewModel, modifier = Modifier.padding(innerPadding))
     }
 }
 
 @Composable
 fun ProfileSettings1(
+    viewModel: ProfileSettingsViewModel,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val store = ProfileSettingsStorage(context)
-    //val profileSettings = store.profileSettingsFlow.collectAsStateWithLifecycle(ProfileSettings())
-    val scope = rememberCoroutineScope()
+    val profileSettings by viewModel.profileSettings.collectAsState()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -96,8 +103,8 @@ fun ProfileSettings1(
                 Text(text = "Require authentication to enter this app")
             }
             Switch(
-                checked = false,
-                onCheckedChange = {  },
+                checked = profileSettings.passwordEnabled,
+                onCheckedChange = { viewModel.togglePasswordProtected(it) },
             )
         }
         Row(
@@ -113,7 +120,7 @@ fun ProfileSettings1(
             }
             Switch(
                 checked = false,
-                onCheckedChange = {  },
+                onCheckedChange = { viewModel.togglePasswordProtected(it) },
             )
 
         }

@@ -2,6 +2,7 @@ package com.cs407.uteri.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -18,7 +19,7 @@ data class ProfileSettings (
 
 class ProfileSettingsStorage(private val context: Context) {
     companion object {
-        private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("profile_settings_storage")
+        private val Context.dataStore by preferencesDataStore("profile_settings_storage")
 
         private object PreferenceKeys {
             val PASSWORD_ENABLED = booleanPreferencesKey("passwordEnabled")
@@ -27,7 +28,13 @@ class ProfileSettingsStorage(private val context: Context) {
     }
 
     val profileSettingsFlow: Flow<ProfileSettings> = context.dataStore.data
-        .catch { emit(emptyPreferences()) }
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
         .map { settings ->
         val passwordEnabled = settings[PreferenceKeys.PASSWORD_ENABLED] ?: false
         val offlineMode = settings[PreferenceKeys.OFFLINE_MODE] ?: false
