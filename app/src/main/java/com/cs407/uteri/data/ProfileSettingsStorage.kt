@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -14,7 +15,8 @@ import kotlinx.coroutines.flow.map
 
 data class ProfileSettings (
     val passwordEnabled: Boolean = false,
-    val offlineMode: Boolean = false
+    val offlineMode: Boolean = false,
+    val cycleLength: Int = 28
 )
 
 class ProfileSettingsStorage(private val context: Context) {
@@ -24,6 +26,7 @@ class ProfileSettingsStorage(private val context: Context) {
         private object PreferenceKeys {
             val PASSWORD_ENABLED = booleanPreferencesKey("passwordEnabled")
             val OFFLINE_MODE = booleanPreferencesKey("offlineMode")
+            val CYCLE_LENGTH = intPreferencesKey("cycleLength")
         }
     }
 
@@ -38,8 +41,9 @@ class ProfileSettingsStorage(private val context: Context) {
         .map { settings ->
         val passwordEnabled = settings[PreferenceKeys.PASSWORD_ENABLED] ?: false
         val offlineMode = settings[PreferenceKeys.OFFLINE_MODE] ?: false
+        val cycleLength = settings[PreferenceKeys.CYCLE_LENGTH] ?: 28
 
-        ProfileSettings(passwordEnabled, offlineMode)
+        ProfileSettings(passwordEnabled, offlineMode, cycleLength)
     }
 
     suspend fun savePasswordSetting(passwordEnabled: Boolean) {

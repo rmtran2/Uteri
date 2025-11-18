@@ -18,3 +18,8 @@ val RaspberryRose = Color(0xFFB23A66)
 val PayneGray = Color(0xFF4A5568)
 val Jet = Color(0xFF333333)
 val TickleMePink = Color(0xFFFF85A8)
+
+
+// UterUs Color Palette 2.0
+val UterUsPink = Color(0xFFFF6489)
+val UterUsYellow = Color(0xFFFFe598)
