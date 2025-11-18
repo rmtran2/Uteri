@@ -3,6 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    kotlin("plugin.serialization") version "2.2.20"
+    id("com.google.devtools.ksp")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -49,6 +52,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    // Datastore library
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
@@ -65,6 +69,15 @@ dependencies {
     implementation("com.google.maps.android:maps-compose-utils:$mapsComposeVersion")
     // Google Maps Compose widgets library
     implementation("com.google.maps.android:maps-compose-widgets:$mapsComposeVersion")
+    // Firebase library
+    implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
+    implementation("com.google.firebase:firebase-auth")
+
+    val room_version = "2.8.3"
+
+    implementation("androidx.room:room-runtime:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-ktx:${room_version}")
 }
 
 secrets {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "859121162234",
+    "project_id": "uterus-c16c0",
+    "storage_bucket": "uterus-c16c0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:859121162234:android:6d91996a88bbd948a37643",
+        "android_client_info": {
+          "package_name": "com.cs407.uteri"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBp-9sM3LhRWtbWnAGWgROcr2YV8v-VkN8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

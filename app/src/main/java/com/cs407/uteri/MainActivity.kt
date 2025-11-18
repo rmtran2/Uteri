@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,17 +14,23 @@ import androidx.navigation.compose.rememberNavController
 import com.cs407.uteri.data.ProfileSettingsStorage
 import com.cs407.uteri.ui.screen.CalendarScreen
 import com.cs407.uteri.ui.screen.HomePage
+import com.cs407.uteri.ui.screen.LoginScreen
 import com.cs407.uteri.ui.screen.settings.ProfileSettingsScreen
 import com.cs407.uteri.ui.screen.ResourceMapScreen
 import com.cs407.uteri.ui.screen.TimerScreen
 import com.cs407.uteri.ui.screen.settings.ProfileSettingsViewModel
 import com.cs407.uteri.ui.screen.settings.ProfileSettingsViewModelFactory
 import com.cs407.uteri.ui.theme.UteriTheme
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 
 class MainActivity : ComponentActivity() {
+    private lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val prefsManager = ProfileSettingsStorage(this)
+        auth = Firebase.auth
         enableEdgeToEdge()
         setContent {
             UteriTheme {
@@ -38,7 +46,13 @@ fun AppNavigation(
 ){
     val navController = rememberNavController()
     val viewModel: ProfileSettingsViewModel = viewModel(factory = ProfileSettingsViewModelFactory(prefsManager))
+    val profileSettings by viewModel.profileSettings.collectAsState()
 
+    val startDest = when (profileSettings.passwordEnabled) {
+        null -> Screen.HOME.route
+        true -> Screen.LOGIN.route
+        false -> Screen.HOME.route
+    }
     NavHost(
         navController = navController,
         startDestination = Screen.HOME.route
@@ -63,6 +77,9 @@ fun AppNavigation(
         composable(Screen.PROFILE.route) {
             ProfileSettingsScreen (prefsManager, { navController.navigate("home") }, navController)
         }
+        composable(Screen.LOGIN.route) {
+            LoginScreen()
+        }
 
     }
 
@@ -73,5 +90,7 @@ enum class Screen(val route: String) {
     CALENDAR("calendar"),
     TIMER("timer"),
     MAP("map"),
-    PROFILE("profile")
+    PROFILE("profile"),
+
+    LOGIN("login")
 }
