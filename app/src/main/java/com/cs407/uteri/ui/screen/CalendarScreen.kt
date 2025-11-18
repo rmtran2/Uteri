@@ -3,45 +3,67 @@ package com.cs407.uteri.ui.screen
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -54,6 +76,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.cs407.uteri.R
+import com.cs407.uteri.data.DatabaseProvider
+import com.cs407.uteri.data.Mood
+import com.cs407.uteri.ui.screen.CalendarViewModel
+import com.cs407.uteri.ui.screen.CalendarViewModelFactory
 import com.cs407.uteri.ui.utils.Navbar
 import java.time.LocalDate
 import java.time.YearMonth
@@ -66,9 +92,22 @@ fun CalendarScreen(
     onNavigateBack: () -> Unit,
     navController: NavController
 ) {
+    val context = LocalContext.current
+    val database = remember { DatabaseProvider.getDatabase(context) }
+    val viewModel: CalendarViewModel = viewModel(
+        factory = CalendarViewModelFactory(database)
+    )
+    
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     var showModal by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    
+    LaunchedEffect(showModal) {
+        if (showModal) {
+            sheetState.expand()
+        }
+    }
 
     Scaffold(
         bottomBar = { Navbar(navController) },
@@ -99,20 +138,12 @@ fun CalendarScreen(
                             contentDescription = "Previous Month"
                         )
                     }
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = Color(0xFFE0E0E0),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .padding(horizontal = 20.dp, vertical = 8.dp)
-                    ) {
                         Text(
                             text = "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentMonth.year}",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium),
-                            color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                         )
-                    }
                     IconButton(onClick = { 
                         currentMonth = currentMonth.plusMonths(1)
                     }) {
@@ -123,30 +154,31 @@ fun CalendarScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                // Calendar view at the top
-                    Card(
+                GradientCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    startColor = Color(0xFFE1BEE7),
+                    endColor = Color(0xFFB39DDB)
                 ) {
                     Calendar(
                         modifier = Modifier.padding(16.dp),
-                        currentMonth = currentMonth
+                        currentMonth = currentMonth,
+                        entries = viewModel.allEntries.collectAsState().value,
+                        onDateClick = { date ->
+                            selectedDate = date
+                            showModal = true
+                        }
                     )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                // Cycle phase card
-                Card(
+                GradientCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(120.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFB6C1)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    startColor = Color(0xFFFF9DB5),
+                    endColor = Color(0xFFFF6B9D)
                 ) {
                     Row(
                         modifier = Modifier
@@ -173,17 +205,14 @@ fun CalendarScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(12.dp))
-                // Blank card
-                    Card(
+                GradientCard(
                         modifier = Modifier
                             .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(120.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF5E6F0)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    startColor = Color(0xFFE8B8E0),
+                    endColor = Color(0xFFD1A4D1)
                 ) {
-                    // Blank for now
                 }
             }
         }
@@ -193,16 +222,33 @@ fun CalendarScreen(
                 sheetState = sheetState,
                 containerColor = Color.White
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(400.dp)
-                        .padding(16.dp)
-                ) {
-                    // Blank modal content
-                }
+                LogEntryForm(
+                    date = selectedDate,
+                    viewModel = viewModel,
+                    onDismiss = { showModal = false }
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun GradientCard(
+    modifier: Modifier = Modifier,
+    startColor: Color,
+    endColor: Color,
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(startColor, endColor)
+                ),
+                shape = RoundedCornerShape(24.dp)
+            )
+    ) {
+        content()
     }
 }
 
@@ -217,7 +263,6 @@ private fun CycleProgressView() {
             val strokeWidth = 6.dp.toPx()
             val stroke = Stroke(width = strokeWidth, cap = StrokeCap.Round)
 
-            // Background arc
             drawArc(
                 color = Color.White.copy(alpha = 0.3f),
                 startAngle = -90f,
@@ -227,7 +272,6 @@ private fun CycleProgressView() {
                 size = arcSize,
                 style = stroke
             )
-            // Progress arc
             drawArc(
                 color = Color.White,
                 startAngle = -90f,
@@ -269,9 +313,12 @@ private fun CycleProgressView() {
 @Composable
 private fun Calendar(
     modifier: Modifier = Modifier,
-    currentMonth: YearMonth
+    currentMonth: YearMonth,
+    entries: List<com.cs407.uteri.data.LogEntry>,
+    onDateClick: (LocalDate) -> Unit
 ) {
     val today = LocalDate.now()
+    val entriesByDate = entries.associateBy { it.date }
 
     val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     val cells = buildList {
@@ -288,7 +335,6 @@ private fun Calendar(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Calendar Grid
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
         ) {
@@ -297,11 +343,19 @@ private fun Calendar(
                     contentAlignment = Alignment.Center
                 ) {
                     when (cell) {
-                        is LocalDate -> CalendarCell(cell, cell == today)
+                        is LocalDate -> {
+                            val entry = entriesByDate[cell]
+                            CalendarCell(
+                                date = cell,
+                                isToday = cell == today,
+                                hasFlow = entry?.flow == true,
+                                onClick = { onDateClick(cell) }
+                            )
+                        }
                         is String -> Text(
                             cell,
                             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            color = Color.White
                         )
                         null -> Box(
                             modifier = Modifier.aspectRatio(1f),
@@ -325,13 +379,40 @@ private fun Calendar(
 @Composable
 private fun CalendarCell(
     date: LocalDate,
-    isToday: Boolean = false
+    isToday: Boolean = false,
+    hasFlow: Boolean = false,
+    onClick: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed = interactionSource.collectIsPressedAsState().value
+    
     Box(
         modifier = Modifier
             .aspectRatio(1f)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
             .background(
-                color = Color.White,
+                    color = when {
+                        isPressed -> if (isToday) Color(0xFF90CAF9) else Color(0xFFF5F5F5)
+                        isToday -> Color(0xFF64B5F6)
+                        else -> Color.White
+                    },
+                    shape = CircleShape
+                )
+                .border(
+                    width = if (isToday || hasFlow) 2.dp else 1.dp,
+                    color = when {
+                        hasFlow -> Color(0xFFFF6B9D)
+                        isToday -> Color(0xFF42A5F5)
+                        else -> Color(0xFFE0E0E0)
+                    },
                 shape = CircleShape
             )
     ) {
@@ -340,13 +421,237 @@ private fun CalendarCell(
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = if (isToday) FontWeight.SemiBold else FontWeight.Normal
             ),
-            color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.87f),
+                color = if (isToday) Color(0xFF1976D2) else Color(0xFF2C2C2C),
             modifier = Modifier.align(Alignment.Center)
         )
+        }
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFFC7DEFFFF)
+@Composable
+private fun LogEntryForm(
+    date: LocalDate,
+    viewModel: CalendarViewModel,
+    onDismiss: () -> Unit
+) {
+    val medications by viewModel.medications.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+    
+    var flow by remember { mutableStateOf(false) }
+    var birthControl by remember { mutableStateOf(false) }
+    var selectedMoods by remember { mutableStateOf(setOf<Mood>()) }
+    var selectedMedications by remember { mutableStateOf(setOf<Int>()) }
+    
+    var showAddMedicationDialog by remember { mutableStateOf(false) }
+    var newMedicationName by remember { mutableStateOf("") }
+    var newMedicationType by remember { mutableStateOf("") }
+    
+    LaunchedEffect(date) {
+        val existingEntry = viewModel.getEntryForDate(date)
+        existingEntry?.let {
+            flow = it.flow
+            birthControl = it.birthControl
+            selectedMoods = it.moods?.toSet() ?: emptySet()
+            selectedMedications = it.medications?.toSet() ?: emptySet()
+        }
+    }
+    
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(horizontal = 16.dp)
+            .padding(top = 16.dp)
+            .padding(bottom = 32.dp)
+            .imePadding(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Log Entry for ${date.format(java.time.format.DateTimeFormatter.ofPattern("MMMM d, yyyy"))}",
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Flow",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Switch(
+                checked = flow,
+                onCheckedChange = { flow = it }
+            )
+        }
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Birth Control",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Switch(
+                checked = birthControl,
+                onCheckedChange = { birthControl = it }
+            )
+        }
+        
+        Text(
+            text = "Moods",
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(Mood.values().toList()) { mood ->
+                FilterChip(
+                    selected = selectedMoods.contains(mood),
+                    onClick = {
+                        selectedMoods = if (selectedMoods.contains(mood)) {
+                            selectedMoods - mood
+                        } else {
+                            selectedMoods + mood
+                        }
+                    },
+                    label = {
+                        Text(
+                            text = mood.name.lowercase().replaceFirstChar { it.uppercase() },
+                            fontSize = 12.sp
+                        )
+                    }
+                )
+            }
+        }
+        
+        Text(
+            text = "Medications",
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        
+        medications.forEach { medication ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${medication.name} (${medication.type})",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Checkbox(
+                    checked = selectedMedications.contains(medication.id),
+                    onCheckedChange = { checked ->
+                        selectedMedications = if (checked) {
+                            selectedMedications + medication.id
+                        } else {
+                            selectedMedications - medication.id
+                        }
+                    }
+                )
+            }
+        }
+        
+        TextButton(
+            onClick = { showAddMedicationDialog = true }
+        ) {
+            Text("+ Add New Medication")
+        }
+        
+        if (showAddMedicationDialog) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = Color(0xFFF5F5F5),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "Add New Medication",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                OutlinedTextField(
+                    value = newMedicationName,
+                    onValueChange = { newMedicationName = it },
+                    label = { Text("Medication Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = newMedicationType,
+                    onValueChange = { newMedicationType = it },
+                    label = { Text("Type") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = {
+                            showAddMedicationDialog = false
+                            newMedicationName = ""
+                            newMedicationType = ""
+                        }
+                    ) {
+                        Text("Cancel")
+                    }
+                    Spacer(modifier = Modifier.padding(8.dp))
+                    Button(
+                        onClick = {
+                            coroutineScope.launch {
+                                val newId = viewModel.addMedication(newMedicationName, newMedicationType)
+                                selectedMedications = selectedMedications + newId.toInt()
+                                showAddMedicationDialog = false
+                                newMedicationName = ""
+                                newMedicationType = ""
+                            }
+                        },
+                        enabled = newMedicationName.isNotBlank() && newMedicationType.isNotBlank()
+                    ) {
+                        Text("Add")
+                    }
+                }
+            }
+        }
+        
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    viewModel.saveLogEntry(
+                        date = date,
+                        flow = flow,
+                        moods = selectedMoods.toList(),
+                        birthControl = birthControl,
+                        medicationIds = selectedMedications.toList()
+                    )
+                    onDismiss()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Save Entry")
+        }
+    }
+}
+
+@Preview(showBackground = true)
 @Composable
 fun CalendarScreenPreview() {
     val navController = rememberNavController()

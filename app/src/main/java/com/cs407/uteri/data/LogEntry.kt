@@ -14,10 +14,10 @@ import java.time.LocalDate
 data class LogEntry(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val date: LocalDate,
-    val flow: Boolean,
-    val moods: List<Mood>?,         // list of moods
-    val birthControl: Boolean,
-    val medications: List<Int>?     // list of medication IDs
+    val flow: Boolean = false,
+    val moods: List<Mood>?,
+    val birthControl: Boolean = false,
+    val medications: List<Int>?
 )
 
 class LocalDateConverter {
@@ -36,14 +36,15 @@ class MoodListConverter {
     private val gson = Gson()
 
     @TypeConverter
-    fun fromList(value: List<Mood>?): String {
-        return gson.toJson(value)
+    fun fromList(value: List<Mood>?): String? {
+        return if (value == null) null else gson.toJson(value)
     }
 
     @TypeConverter
-    fun toList(value: String): List<Mood> {
+    fun toList(value: String?): List<Mood>? {
+        if (value == null) return null
         val type = object : TypeToken<List<Mood>>() {}.type
-        return gson.fromJson(value, type)
+        return gson.fromJson(value, type) ?: emptyList()
     }
 }
 
@@ -51,13 +52,14 @@ class MedicationListConverter {
     private val gson = Gson()
 
     @TypeConverter
-    fun fromList(list: List<Int>?): String {
-        return gson.toJson(list ?: emptyList<Int>())
+    fun fromList(list: List<Int>?): String? {
+        return if (list == null) null else gson.toJson(list)
     }
 
     @TypeConverter
-    fun toList(value: String): List<Int> {
+    fun toList(value: String?): List<Int>? {
+        if (value == null) return null
         val type = object : TypeToken<List<Int>>() {}.type
-        return Gson().fromJson(value, type)
+        return gson.fromJson(value, type) ?: emptyList()
     }
 }
