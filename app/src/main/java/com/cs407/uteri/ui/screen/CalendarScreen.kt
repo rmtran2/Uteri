@@ -111,7 +111,7 @@ fun CalendarScreen(
 
     Scaffold(
         bottomBar = { Navbar(navController) },
-        containerColor = Color.White,
+        containerColor = Color(0xFFFFFae8),
         floatingActionButton = {
             FloatingActionButton(onClick = { showModal = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
@@ -158,8 +158,8 @@ fun CalendarScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                    startColor = Color(0xFFE1BEE7),
-                    endColor = Color(0xFFB39DDB)
+                    startColor = Color(0xFFFF93BA),
+                    endColor = Color(0xFFFF6489)
                 ) {
                     Calendar(
                         modifier = Modifier.padding(16.dp),
@@ -177,8 +177,8 @@ fun CalendarScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(120.dp),
-                    startColor = Color(0xFFFF9DB5),
-                    endColor = Color(0xFFFF6B9D)
+                    startColor = Color(0xFFFF6489),
+                    endColor = Color(0xFFFFE1EB)
                 ) {
                     Row(
                         modifier = Modifier
@@ -210,8 +210,8 @@ fun CalendarScreen(
                             .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(120.dp),
-                    startColor = Color(0xFFE8B8E0),
-                    endColor = Color(0xFFD1A4D1)
+                    startColor = Color(0xFFFFe598),
+                    endColor = Color(0xFFFFD75F)
                 ) {
                 }
             }
@@ -401,16 +401,16 @@ private fun CalendarCell(
             .background(
                     color = when {
                         isPressed -> if (isToday) Color(0xFF90CAF9) else Color(0xFFF5F5F5)
-                        isToday -> Color(0xFF64B5F6)
+                        isToday -> Color(0xFFFFe598)
                         else -> Color.White
                     },
                     shape = CircleShape
                 )
                 .border(
-                    width = if (isToday || hasFlow) 2.dp else 1.dp,
+                    width = if (isToday || hasFlow) 4.dp else 1.dp,
                     color = when {
-                        hasFlow -> Color(0xFFFF6B9D)
-                        isToday -> Color(0xFF42A5F5)
+                        hasFlow -> Color(0xFF700000)
+                        isToday -> Color(0xFFFF6489)
                         else -> Color(0xFFE0E0E0)
                     },
                 shape = CircleShape
@@ -421,7 +421,7 @@ private fun CalendarCell(
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = if (isToday) FontWeight.SemiBold else FontWeight.Normal
             ),
-                color = if (isToday) Color(0xFF1976D2) else Color(0xFF2C2C2C),
+                color = if (isToday) Color(0xFF590056) else Color.Black,
             modifier = Modifier.align(Alignment.Center)
         )
         }
