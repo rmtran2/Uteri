@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -60,13 +61,17 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    // Google Maps Compose library
+    // Google Maps
     val mapsComposeVersion = "4.4.1"
     implementation("com.google.maps.android:maps-compose:$mapsComposeVersion")
-    // Google Maps Compose utility library
     implementation("com.google.maps.android:maps-compose-utils:$mapsComposeVersion")
-    // Google Maps Compose widgets library
     implementation("com.google.maps.android:maps-compose-widgets:$mapsComposeVersion")
+    // Room Database
+    val room_version = "2.8.3"
+    implementation("androidx.room:room-runtime:${room_version}")
+    ksp("androidx.room:room-compiler:${room_version}")
+    implementation("androidx.room:room-ktx:${room_version}")
+    implementation("com.google.code.gson:gson:2.10.1")
 }
 
 secrets {
