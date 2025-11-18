@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
@@ -50,6 +51,9 @@ import com.cs407.uteri.R
 import com.cs407.uteri.data.ProfileSettings
 import com.cs407.uteri.data.ProfileSettingsStorage
 import com.cs407.uteri.ui.utils.Navbar
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,7 +117,12 @@ fun ProfileSettings1(
     var password by remember { mutableStateOf("") }
 
     Column(modifier = modifier) {
-        Spacer(Modifier.padding(50.dp))
+        Spacer(Modifier.padding(20.dp))
+        Row(
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Icon(imageVector = Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(100.dp))
+        }
         Row(
             modifier = Modifier.fillMaxWidth().padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -130,7 +139,14 @@ fun ProfileSettings1(
                 onCheckedChange = { viewModel.togglePasswordProtected(it) },
             )
         }
+        Text("User authentication can always be disabled, but users have this option in " +
+                "order to add another layer of privacy on their health data.")
         Spacer(Modifier.padding(16.dp))
+        Image(
+            painter = painterResource(id = R.drawable.cloud_54__1_),
+            contentDescription = "Logo",
+            modifier = Modifier.size(100.dp).align(Alignment.CenterHorizontally)
+        )
         Row(
             modifier = Modifier.fillMaxWidth().padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
