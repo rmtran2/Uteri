@@ -47,4 +47,10 @@ class ProfileSettingsStorage(private val context: Context) {
             settings[PreferenceKeys.PASSWORD_ENABLED] = passwordEnabled
         }
     }
+
+    suspend fun saveOfflineSetting(offlineMode: Boolean) {
+        context.dataStore.edit { settings ->
+            settings[PreferenceKeys.OFFLINE_MODE] = offlineMode
+        }
+    }
 }

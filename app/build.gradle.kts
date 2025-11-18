@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("com.google.devtools.ksp")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -49,6 +51,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    // Datastore library
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
@@ -65,6 +68,9 @@ dependencies {
     implementation("com.google.maps.android:maps-compose-utils:$mapsComposeVersion")
     // Google Maps Compose widgets library
     implementation("com.google.maps.android:maps-compose-widgets:$mapsComposeVersion")
+    // Firebase library
+    implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
+    implementation("com.google.firebase:firebase-auth")
 }
 
 secrets {
