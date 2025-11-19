@@ -66,19 +66,19 @@ fun AppNavigation(
             )
         }
         composable(Screen.CALENDAR.route) {
-            CalendarScreen ({navController.navigate("home")}, navController)
+            CalendarScreen ({navController.navigate(Screen.HOME.route)}, navController)
         }
         composable(Screen.MAP.route) {
-            ResourceMapScreen ({ navController.navigate("home")}, navController)
+            ResourceMapScreen ({ navController.navigate(Screen.HOME.route)}, navController)
         }
         composable(Screen.TIMER.route) {
-            TimerScreen ({ navController.navigate("home") }, navController)
+            TimerScreen ({ navController.navigate(Screen.HOME.route) }, navController)
         }
         composable(Screen.PROFILE.route) {
             ProfileSettingsScreen (prefsManager, { navController.navigate("home") }, navController)
         }
         composable(Screen.LOGIN.route) {
-            LoginScreen()
+            LoginScreen(onNavigateToHome = {navController.navigate(Screen.HOME.route)})
         }
 
     }
