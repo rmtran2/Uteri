@@ -1,6 +1,7 @@
 package com.cs407.uteri.auth
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -9,7 +10,8 @@ import com.google.firebase.auth.auth
 fun signIn(
     email: String,
     password: String,
-    context: Context
+    context: Context,
+    onNavigateToHome: () -> Unit
     //any other callback function or parameters if you want
 ) {
     val auth = Firebase.auth
@@ -18,9 +20,10 @@ fun signIn(
             if (task.isSuccessful) {
                 // Sign in success
                 val user = auth.currentUser
+                onNavigateToHome()
             } else {
                 // Sign in failed, try creating account
-                createAccount(email, password, context)
+                createAccount(email, password, context,  onNavigateToHome)
             }
         }
 }
@@ -31,16 +34,18 @@ fun signIn(
 fun createAccount(
     email: String,
     password: String,
-    context: Context
+    context: Context,
+    onNavigateToHome: () -> Unit
     //any other callback function or parameters if you want
 ) {
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
     auth.createUserWithEmailAndPassword(email, password)
         .addOnSuccessListener { result ->
             val user = auth.currentUser
-
+            onNavigateToHome()
         }
         .addOnFailureListener { exception ->
+            Log.e("AUTH", "Sign-in failed", exception)
             Toast.makeText(context, "Authentication failed.", Toast.LENGTH_SHORT).show()
         }
 }

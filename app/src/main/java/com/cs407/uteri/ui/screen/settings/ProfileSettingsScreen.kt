@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
@@ -26,6 +27,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -113,8 +115,8 @@ fun ProfileSettings1(
 ) {
     val profileSettings by viewModel.profileSettings.collectAsState()
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false) }
+    var pendingPasswordChange by remember { mutableStateOf(profileSettings.passwordEnabled) }
 
     Column(modifier = modifier) {
         Spacer(Modifier.padding(20.dp))
@@ -136,7 +138,14 @@ fun ProfileSettings1(
             }
             Switch(
                 checked = profileSettings.passwordEnabled,
-                onCheckedChange = { viewModel.togglePasswordProtected(it) },
+                onCheckedChange = {
+                    if (profileSettings.passwordEnabled) {
+                        viewModel.togglePasswordProtected(it)
+                    } else {
+                        pendingPasswordChange = it
+                        showDialog = true
+                    }
+                },
             )
         }
         Text("User authentication can always be disabled, but users have this option in " +
@@ -167,30 +176,35 @@ fun ProfileSettings1(
 
         Spacer(Modifier.padding(16.dp))
 
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = Color(0xFFFFF0F5)
-            ),
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp)
-        ) {
-            Text(
-                text = "Login",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.align(Alignment.CenterHorizontally).padding(8.dp)
-            )
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth().padding(8.dp)
-            )
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") },
-                modifier = Modifier.fillMaxWidth().padding(8.dp)
+        if(showDialog && !profileSettings.passwordEnabled) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDialog = false
+                    pendingPasswordChange = false
+                },
+                title = { Text("Confirm Authentication Change") },
+                text = { Text("Changing to password protected mode will send you to a login page. Please input the credentials " +
+                        "you would like to use to access the app with. Password protected mode can be disabled at any time in the profile settings.") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showDialog = false
+                            viewModel.togglePasswordProtected(pendingPasswordChange)
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showDialog = false
+                            pendingPasswordChange = false
+                        }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
             )
         }
 
