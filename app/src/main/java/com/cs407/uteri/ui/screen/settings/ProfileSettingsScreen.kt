@@ -11,19 +11,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -33,7 +28,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,21 +35,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cs407.uteri.R
-import com.cs407.uteri.data.ProfileSettings
 import com.cs407.uteri.data.ProfileSettingsStorage
 import com.cs407.uteri.ui.utils.Navbar
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,7 +137,7 @@ fun ProfileSettings1(
             )
         }
         Text("User authentication can always be disabled, but users have this option in " +
-                "order to add another layer of privacy on their health data.")
+                "order to add another layer of privacy on their health data.", modifier = Modifier.padding(8.dp))
         Spacer(Modifier.padding(16.dp))
         Image(
             painter = painterResource(id = R.drawable.cloud_54__1_),
@@ -173,6 +161,8 @@ fun ProfileSettings1(
             )
 
         }
+        Text("As a user, you can either choose to store your data online to enable syncing between devices or to store it " +
+                "on your device in order to increase privacy.", modifier = Modifier.padding(8.dp))
 
         Spacer(Modifier.padding(16.dp))
 
@@ -184,7 +174,9 @@ fun ProfileSettings1(
                 },
                 title = { Text("Confirm Authentication Change") },
                 text = { Text("Changing to password protected mode will send you to a login page. Please input the credentials " +
-                        "you would like to use to access the app with. Password protected mode can be disabled at any time in the profile settings.") },
+                            "you would like to use to access the app with. Password protected mode can be disabled at any time in the profile settings.",
+                            modifier = Modifier.align(Alignment.CenterHorizontally))
+                       },
                 confirmButton = {
                     TextButton(
                         onClick = {

@@ -77,6 +77,9 @@ dependencies {
     ksp("androidx.room:room-compiler:${room_version}")
     implementation("androidx.room:room-ktx:${room_version}")
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // Health Connect SDK
+    implementation("androidx.health.connect:connect-client:1.1.0-alpha11")
 }
 
 secrets {
