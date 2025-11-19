@@ -6,4 +6,5 @@
     <string name="Profile">Profile</string>
     <string name="Menstrual_Phase">Menstrual Phase</string>
     <string name="enter_time_label">Enter Time</string>
+    <string name="invalid_email">Invalid Email</string>
 </resources>

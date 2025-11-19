@@ -10,18 +10,24 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.cs407.uteri.R
 import com.cs407.uteri.ui.utils.Navbar
+import kotlin.concurrent.timer
+import com.cs407.uteri.ui.theme.UterUsPink
+import com.cs407.uteri.ui.theme.UterUsYellow
 
 @Composable
 fun TimerScreen(
@@ -74,7 +80,15 @@ fun TimerScreen(
             Box(
                 modifier = Modifier
                     .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
-                    .background(colorResource(id = R.color.pink), shape = RoundedCornerShape(16.dp))
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                UterUsPink,
+                                UterUsYellow
+                            )
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    )
                     .padding(24.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -139,8 +153,8 @@ fun TimerScreen(
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 32.dp)) {
                 Text(
                     text = "Defaults:",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(bottom = 8.dp),
+                    fontSize = 25.sp,
+                    modifier = Modifier.padding(bottom = 10.dp),
                     textAlign = TextAlign.Center
                 )
                 Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
@@ -148,10 +162,12 @@ fun TimerScreen(
                         Button(
                             onClick = { startTimer(hrs, 0) },
                             shape = CircleShape,
-                            modifier = Modifier.size(64.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.pink))
+                            modifier = Modifier.size(70.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFF69B4) // Pink color for buttons
+                            )
                         ) {
-                            Text("$hrs h", fontSize = 18.sp)
+                            Text("$hrs h", fontSize = 16.sp)
                         }
                         Spacer(modifier = Modifier.width(24.dp))
                     }
@@ -192,8 +208,18 @@ fun TimerScreen(
                     .height(56.dp)
                     .width(180.dp)
             ) {
-                Text(if (isRunning) "Stop" else "Start", fontSize = 20.sp)
+                Text(if (isRunning) "stop" else "start", fontSize = 20.sp)
             }
         }
     }
 }
+
+//@Preview(showBackground = true)
+//@Composable
+//fun Preview(){
+//    val navController = rememberNavController()
+//    TimerScreen(
+//        onNavigateBack = {},
+//        navController = navController
+//    )
+//}
