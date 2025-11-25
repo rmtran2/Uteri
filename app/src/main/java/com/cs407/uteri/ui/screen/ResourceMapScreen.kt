@@ -2,14 +2,20 @@ package com.cs407.uteri.ui.screen
 
 import android.Manifest
 import android.app.Application
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,7 +28,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -45,12 +53,13 @@ import com.google.android.libraries.places.api.net.SearchNearbyRequest
 import com.google.android.libraries.places.api.net.SearchNearbyResponse
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
-
+import android.location.Geocoder
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import java.util.Locale
 
 lateinit var includedPlaceTypes: List<String>
 private lateinit var placesClient: PlacesClient
-
-
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -64,15 +73,14 @@ fun ResourceMapScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
 
+    var currentState by rememberSaveable{ mutableStateOf("Unknown") }
     val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         if (!::placesClient.isInitialized) {
             placesClient = Places.createClient(context)
         }
     }
-
-
-
     // Get the permission access and remember for future
     val locationPermissionState = rememberPermissionState(
         Manifest.permission.ACCESS_FINE_LOCATION
@@ -101,6 +109,14 @@ fun ResourceMapScreen(
         position = CameraPosition.fromLatLngZoom(defaultLocation, 12f)
     }
 
+    LaunchedEffect(cameraPositionState) {
+        snapshotFlow { cameraPositionState.position.target }
+            .distinctUntilChanged()
+            .collect { latLng ->
+                currentState = getStateFromLatLng(context, latLng.latitude, latLng.longitude)
+            }
+    }
+
     LaunchedEffect(uiState.currentLocation) {
         uiState.currentLocation?.let { location ->
             cameraPositionState.animate(
@@ -119,35 +135,14 @@ fun ResourceMapScreen(
 
     var expanded by rememberSaveable { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
+    var showAbortionInfo by rememberSaveable { mutableStateOf(false) }
 
     Scaffold (
         bottomBar = {
             Navbar(navController)
         }
     ) { padding ->
-        Column(
-            modifier = Modifier.padding(padding)
-        ) {
-            SearchBar(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally),
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        query = query,
-                        onQueryChange = { query = it },
-                        onSearch = {
-                            expanded = false
-                        },
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it },
-                        placeholder = { Text("Search") }
-                    )
-                },
-                expanded = expanded,
-                onExpandedChange = { expanded = it },
-            ) {
-                Text("TODO.")
-            }
+        Box(modifier = Modifier.fillMaxSize()) {
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState
@@ -157,6 +152,51 @@ fun ResourceMapScreen(
                         state = MarkerState(position = marker.latLng),
                         title = marker.name
                     )
+                }
+            }
+            Column(
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp)
+            ) {
+                SearchBar(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+                    inputField = {
+                        SearchBarDefaults.InputField(
+                            query = query,
+                            onQueryChange = { query = it },
+                            onSearch = {
+                                expanded = false
+                            },
+                            expanded = expanded,
+                            onExpandedChange = { expanded = it },
+                            placeholder = { Text("Search") }
+                        )
+                    },
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it },
+                ) {
+                    Text("TODO.")
+                }
+
+                FilterChip(
+                    selected = showAbortionInfo,
+                    onClick = { showAbortionInfo = !showAbortionInfo },
+                    label = { Text("Display abortion information") },
+                    Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
+            if (showAbortionInfo) {
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = 16.dp, bottom = 80.dp)
+                        .size(width = 200.dp, height = 100.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text("Current state: $currentState", color = Color.Black)
+                    }
                 }
             }
         }
@@ -194,5 +234,20 @@ class MyApp : Application() {
         if (!Places.isInitialized()) {
             Places.initialize(this, "YOUR_API_KEY")
         }
+    }
+}
+
+fun getStateFromLatLng(context: android.content.Context, lat: Double, lng: Double): String {
+    return try {
+        val geocoder = Geocoder(context, Locale.getDefault())
+        val addresses = geocoder.getFromLocation(lat, lng, 1)
+        if (!addresses.isNullOrEmpty()) {
+            addresses[0].adminArea ?: "Unknown"
+        } else {
+            "Unknown"
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        "Unknown"
     }
 }
