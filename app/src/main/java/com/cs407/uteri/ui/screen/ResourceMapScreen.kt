@@ -55,6 +55,8 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import android.location.Geocoder
 import androidx.compose.runtime.snapshotFlow
+import com.cs407.uteri.ui.screen.settings.getAbortionLawByState
+import com.cs407.uteri.ui.screen.settings.getColorFromCode
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.util.Locale
 
@@ -186,16 +188,30 @@ fun ResourceMapScreen(
                 )
             }
             if (showAbortionInfo) {
+                val law = getAbortionLawByState(currentState)
+
+                val bgColor = law?.let { getColorFromCode(it.color) }
+                    ?: Color.LightGray
+
                 Surface(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .padding(start = 16.dp, bottom = 80.dp)
-                        .size(width = 200.dp, height = 100.dp),
+                        .size(width = 300.dp, height = 200.dp),
                     shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                    color = bgColor
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text("Current state: $currentState", color = Color.Black)
+                        if (law != null) {
+                            Text(
+                                "State: $currentState\n" +
+                                        "Policy: ${law.currentPolicy}\n" +
+                                        "Exceptions: ${law.exceptions}",
+                                color = Color.Black
+                            )
+                        } else {
+                            Text("Abortion law info not available.", color = Color.Black)
+                        }
                     }
                 }
             }
