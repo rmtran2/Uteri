@@ -17,14 +17,23 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs407.uteri.R
+import com.cs407.uteri.data.DatabaseProvider
+import com.cs407.uteri.ui.utils.daysUntil
+import com.cs407.uteri.ui.utils.getCyclePrediction
+import com.cs407.uteri.ui.utils.getLastPeriodStart
+import com.cs407.uteri.ui.utils.getPeriodDay
 
 
 @Composable
@@ -34,6 +43,20 @@ fun HomePage(
     onNavigateToTimer: () -> Unit,
     onNavigateToProfile: () -> Unit,
     modifier: Modifier = Modifier) {
+
+    val context = LocalContext.current
+    val db = remember { DatabaseProvider.getDatabase(context) }
+    val viewModel: CalendarViewModel = viewModel(
+        factory = CalendarViewModelFactory(db)
+    )
+
+    val entries = viewModel.allEntries.collectAsState().value
+
+    val lastStart = getLastPeriodStart(entries)
+    val periodDay = getPeriodDay(lastStart)
+    val nextPeriod = getCyclePrediction(lastStart)
+    val daysUntilNext = daysUntil(nextPeriod)
+
     Row(horizontalArrangement = Arrangement.Start,
         modifier = Modifier.padding(24.dp)){
         ProfileButton(onNavigateToProfile = onNavigateToProfile)
@@ -142,8 +165,11 @@ fun HomePage(
             Spacer(modifier.height(24.dp))
             Text(text = stringResource(R.string.Menstrual_Phase),
                 color = colorResource(id = R.color.pink), fontSize = 25.sp)
+            Spacer(modifier.height(24.dp))
+            MenstrualRing(
+                periodDay = periodDay,
+                daysUntilNext = daysUntilNext
+            )
         }
-
-
     }
 }
