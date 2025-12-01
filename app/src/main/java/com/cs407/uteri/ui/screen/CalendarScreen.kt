@@ -29,8 +29,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
@@ -78,9 +76,13 @@ import androidx.navigation.compose.rememberNavController
 import com.cs407.uteri.R
 import com.cs407.uteri.data.DatabaseProvider
 import com.cs407.uteri.data.Mood
-import com.cs407.uteri.ui.screen.CalendarViewModel
-import com.cs407.uteri.ui.screen.CalendarViewModelFactory
 import com.cs407.uteri.ui.utils.Navbar
+import com.cs407.uteri.ui.utils.daysUntil
+import com.cs407.uteri.ui.utils.getCyclePhase
+import com.cs407.uteri.ui.utils.getCyclePrediction
+import com.cs407.uteri.ui.utils.getLastPeriodStart
+import com.cs407.uteri.ui.utils.getPeriodDay
+import com.cs407.uteri.ui.utils.phaseToText
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -97,12 +99,20 @@ fun CalendarScreen(
     val viewModel: CalendarViewModel = viewModel(
         factory = CalendarViewModelFactory(database)
     )
-    
+    val today = LocalDate.now()
+
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     var showModal by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    
+
+    val entries = viewModel.allEntries.collectAsState().value
+
+    val lastStart = getLastPeriodStart(entries)
+    val periodDay = getPeriodDay(lastStart)
+    val nextPeriod = getCyclePrediction(lastStart)
+    val daysUntilNext = daysUntil(nextPeriod)
+
     LaunchedEffect(showModal) {
         if (showModal) {
             sheetState.expand()
@@ -121,8 +131,8 @@ fun CalendarScreen(
         Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                    .padding(padding)
-                    .fillMaxWidth()
+                .padding(padding)
+                .fillMaxWidth()
             ) {
                 Spacer(modifier = Modifier.height(15.dp))
                 Row(
@@ -130,7 +140,7 @@ fun CalendarScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IconButton(onClick = { 
+                    IconButton(onClick = {
                         currentMonth = currentMonth.minusMonths(1)
                     }) {
                         Icon(
@@ -144,7 +154,7 @@ fun CalendarScreen(
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                         )
-                    IconButton(onClick = { 
+                    IconButton(onClick = {
                         currentMonth = currentMonth.plusMonths(1)
                     }) {
                         Icon(
@@ -190,8 +200,10 @@ fun CalendarScreen(
                         Column(
                             modifier = Modifier.weight(1f)
                         ) {
+                            val phase = getCyclePhase(periodDay)
+                            val phaseText = phaseToText(phase)
                             Text(
-                                text = "Current Phase: Ovulation",
+                                text = "Current Phase: $phaseText",
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
                                 color = Color.White
                             )
@@ -200,7 +212,7 @@ fun CalendarScreen(
                             modifier = Modifier.size(80.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            CycleProgressView()
+                            CycleProgressView(periodDay = periodDay)
                         }
                     }
                 }
@@ -208,8 +220,8 @@ fun CalendarScreen(
                 GradientCard(
                         modifier = Modifier
                             .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .height(120.dp),
+                            .padding(horizontal = 16.dp)
+                            .height(120.dp),
                     startColor = Color(0xFFFFe598),
                     endColor = Color(0xFFFFD75F)
                 ) {
@@ -253,9 +265,17 @@ private fun GradientCard(
 }
 
 @Composable
-private fun CycleProgressView() {
+private fun CycleProgressView(
+    periodDay: Int,
+    cycleLength: Int = 28
+) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Canvas(modifier = Modifier.size(80.dp).align(Alignment.Center)) {
+        val progress = (periodDay.toFloat() / cycleLength.toFloat()).coerceIn(0f, 1f)
+        val sweepAngle = (360f * progress).coerceIn(0f, 360f)
+
+        Canvas(modifier = Modifier
+            .size(80.dp)
+            .align(Alignment.Center)) {
             val radius = size.minDimension / 2 - 6.dp.toPx()
             val center = Offset(size.width / 2, size.height / 2)
             val topLeft = Offset(center.x - radius, center.y - radius)
@@ -275,23 +295,29 @@ private fun CycleProgressView() {
             drawArc(
                 color = Color.White,
                 startAngle = -90f,
-                sweepAngle = 360f * (28f / 31f),
+                sweepAngle = sweepAngle,
                 useCenter = false,
                 topLeft = topLeft,
                 size = arcSize,
                 style = stroke
             )
         }
-        Box(modifier = Modifier.size(60.dp).align(Alignment.Center)) {
+        Box(modifier = Modifier
+            .size(60.dp)
+            .align(Alignment.Center)) {
             Image(
                 painter = painterResource(id = R.drawable.asterisk),
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize().alpha(0.2f)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0.2f)
             )
             Text(
-                text = "28",
+                text = periodDay.toString(),
                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                modifier = Modifier.align(Alignment.Center).offset(x = (-12).dp, y = (-8).dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(x = (-12).dp, y = (-8).dp),
                 color = Color.White
             )
             Text(
@@ -301,9 +327,11 @@ private fun CycleProgressView() {
                 color = Color.White
             )
             Text(
-                text = "31",
+                text = cycleLength.toString(),
                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                modifier = Modifier.align(Alignment.Center).offset(x = 12.dp, y = 8.dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(x = 12.dp, y = 8.dp),
                 color = Color.White
             )
         }
@@ -385,7 +413,7 @@ private fun CalendarCell(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed = interactionSource.collectIsPressedAsState().value
-    
+
     Box(
         modifier = Modifier
             .aspectRatio(1f)
@@ -398,7 +426,7 @@ private fun CalendarCell(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-            .background(
+                .background(
                     color = when {
                         isPressed -> if (isToday) Color(0xFF90CAF9) else Color(0xFFF5F5F5)
                         isToday -> Color(0xFFFFe598)
@@ -413,8 +441,8 @@ private fun CalendarCell(
                         isToday -> Color(0xFFFF6489)
                         else -> Color(0xFFE0E0E0)
                     },
-                shape = CircleShape
-            )
+                    shape = CircleShape
+                )
     ) {
         Text(
             text = date.dayOfMonth.toString(),
@@ -436,16 +464,17 @@ private fun LogEntryForm(
 ) {
     val medications by viewModel.medications.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-    
+
     var flow by remember { mutableStateOf(false) }
     var birthControl by remember { mutableStateOf(false) }
     var selectedMoods by remember { mutableStateOf(setOf<Mood>()) }
     var selectedMedications by remember { mutableStateOf(setOf<Int>()) }
-    
+
     var showAddMedicationDialog by remember { mutableStateOf(false) }
     var newMedicationName by remember { mutableStateOf("") }
     var newMedicationType by remember { mutableStateOf("") }
-    
+
+
     LaunchedEffect(date) {
         val existingEntry = viewModel.getEntryForDate(date)
         existingEntry?.let {
@@ -455,7 +484,7 @@ private fun LogEntryForm(
             selectedMedications = it.medications?.toSet() ?: emptySet()
         }
     }
-    
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -471,7 +500,7 @@ private fun LogEntryForm(
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onSurface
         )
-        
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -487,7 +516,7 @@ private fun LogEntryForm(
                 onCheckedChange = { flow = it }
             )
         }
-        
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -503,7 +532,7 @@ private fun LogEntryForm(
                 onCheckedChange = { birthControl = it }
             )
         }
-        
+
         Text(
             text = "Moods",
             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
@@ -531,13 +560,13 @@ private fun LogEntryForm(
                 )
             }
         }
-        
+
         Text(
             text = "Medications",
             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
             color = MaterialTheme.colorScheme.onSurface
         )
-        
+
         medications.forEach { medication ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -561,13 +590,13 @@ private fun LogEntryForm(
                 )
             }
         }
-        
+
         TextButton(
             onClick = { showAddMedicationDialog = true }
         ) {
             Text("+ Add New Medication")
         }
-        
+
         if (showAddMedicationDialog) {
             Column(
                 modifier = Modifier
@@ -630,7 +659,7 @@ private fun LogEntryForm(
                 }
             }
         }
-        
+
         Button(
             onClick = {
                 coroutineScope.launch {
@@ -660,6 +689,3 @@ fun CalendarScreenPreview() {
         navController = navController
     )
 }
-
-
-

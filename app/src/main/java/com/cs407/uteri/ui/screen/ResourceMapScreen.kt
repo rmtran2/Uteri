@@ -57,7 +57,9 @@ import android.location.Geocoder
 import androidx.compose.runtime.snapshotFlow
 import com.cs407.uteri.ui.screen.settings.getAbortionLawByState
 import com.cs407.uteri.ui.screen.settings.getColorFromCode
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
 lateinit var includedPlaceTypes: List<String>
@@ -111,13 +113,16 @@ fun ResourceMapScreen(
         position = CameraPosition.fromLatLngZoom(defaultLocation, 12f)
     }
 
-    LaunchedEffect(cameraPositionState) {
-        snapshotFlow { cameraPositionState.position.target }
-            .distinctUntilChanged()
-            .collect { latLng ->
-                currentState = getStateFromLatLng(context, latLng.latitude, latLng.longitude)
-            }
-    }
+//    LaunchedEffect(cameraPositionState) {
+//        snapshotFlow { cameraPositionState.position.target }
+//            .distinctUntilChanged()
+//            .collect { latLng ->
+//                val state = withContext(Dispatchers.IO) {
+//                    getStateFromLatLng(context, latLng.latitude, latLng.longitude)
+//                }
+//                currentState = state
+//            }
+//    }
 
     LaunchedEffect(uiState.currentLocation) {
         uiState.currentLocation?.let { location ->
@@ -125,6 +130,11 @@ fun ResourceMapScreen(
                 CameraUpdateFactory.newLatLngZoom(location, 15f),
                 1000
             )
+
+            val state = withContext(Dispatchers.IO) {
+                getStateFromLatLng(context, location.latitude, location.longitude)
+            }
+            currentState = state
 
             searchNearbyPlaces(
                 location.latitude,
@@ -256,14 +266,9 @@ class MyApp : Application() {
 fun getStateFromLatLng(context: android.content.Context, lat: Double, lng: Double): String {
     return try {
         val geocoder = Geocoder(context, Locale.getDefault())
-        val addresses = geocoder.getFromLocation(lat, lng, 1)
-        if (!addresses.isNullOrEmpty()) {
-            addresses[0].adminArea ?: "Unknown"
-        } else {
-            "Unknown"
-        }
+        val result = geocoder.getFromLocation(lat, lng, 1)
+        result?.firstOrNull()?.adminArea ?: "Unknown"
     } catch (e: Exception) {
-        e.printStackTrace()
         "Unknown"
     }
 }
