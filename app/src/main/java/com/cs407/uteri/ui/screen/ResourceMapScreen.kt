@@ -170,27 +170,6 @@ fun ResourceMapScreen(
             Column(
                 modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp)
             ) {
-                SearchBar(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally),
-                    inputField = {
-                        SearchBarDefaults.InputField(
-                            query = query,
-                            onQueryChange = { query = it },
-                            onSearch = {
-                                expanded = false
-                            },
-                            expanded = expanded,
-                            onExpandedChange = { expanded = it },
-                            placeholder = { Text("Search") }
-                        )
-                    },
-                    expanded = expanded,
-                    onExpandedChange = { expanded = it },
-                ) {
-                    Text("TODO.")
-                }
-
                 FilterChip(
                     selected = showAbortionInfo,
                     onClick = { showAbortionInfo = !showAbortionInfo },
@@ -207,7 +186,7 @@ fun ResourceMapScreen(
                 Surface(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .padding(start = 16.dp, bottom = 80.dp)
+                        .padding(start = 10.dp, bottom = 10.dp)
                         .size(width = 300.dp, height = 200.dp),
                     shape = RoundedCornerShape(12.dp),
                     color = bgColor
