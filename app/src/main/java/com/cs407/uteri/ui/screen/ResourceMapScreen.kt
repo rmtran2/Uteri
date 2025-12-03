@@ -113,18 +113,19 @@ fun ResourceMapScreen(
         position = CameraPosition.fromLatLngZoom(defaultLocation, 12f)
     }
 
-//    LaunchedEffect(cameraPositionState) {
-//        snapshotFlow { cameraPositionState.position.target }
-//            .distinctUntilChanged()
-//            .collect { latLng ->
-//                val state = withContext(Dispatchers.IO) {
-//                    getStateFromLatLng(context, latLng.latitude, latLng.longitude)
-//                }
-//                currentState = state
-//            }
-//    }
+    LaunchedEffect(cameraPositionState) {
+        snapshotFlow { cameraPositionState.position.target }
+            .distinctUntilChanged()
+            .collect { latLng ->
+                val state = withContext(Dispatchers.IO) {
+                    getStateFromLatLng(context, latLng.latitude, latLng.longitude)
+                }
+                currentState = state
+            }
+    }
 
     LaunchedEffect(uiState.currentLocation) {
+        println("DEBUG — currentState = $currentState")
         uiState.currentLocation?.let { location ->
             cameraPositionState.animate(
                 CameraUpdateFactory.newLatLngZoom(location, 15f),
@@ -266,8 +267,11 @@ class MyApp : Application() {
 fun getStateFromLatLng(context: android.content.Context, lat: Double, lng: Double): String {
     return try {
         val geocoder = Geocoder(context, Locale.getDefault())
-        val result = geocoder.getFromLocation(lat, lng, 1)
-        result?.firstOrNull()?.adminArea ?: "Unknown"
+        val result = geocoder.getFromLocation(lat, lng, 1)?.firstOrNull()
+        val stateName = result?.adminArea
+
+        stateName ?: "Unknown"
+
     } catch (e: Exception) {
         "Unknown"
     }

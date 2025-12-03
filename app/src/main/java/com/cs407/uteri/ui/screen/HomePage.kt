@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -68,18 +69,20 @@ fun HomePage(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            Spacer(modifier.height(48.dp))
             Image(
-                painter = painterResource(id = R.drawable.uteruslogo),
+                painter = painterResource(id = R.drawable.uterus_transparent_min),
                 contentDescription = "Logo",
-                modifier = Modifier.size(250.dp)
+                modifier = Modifier.size(200.dp)
             )
+            Spacer(modifier.height(48.dp))
             Button(
                 onClick = {
                     onNavigateToCalendar()
                 },
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(id = R.color.pink)
+                    containerColor = Color(0xFFFF93BA)
                 ),
                 modifier = Modifier.fillMaxWidth().padding(start=32.dp, end=32.dp).height(94.dp)
             ) {
@@ -109,7 +112,7 @@ fun HomePage(
                 },
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(id = R.color.pink)
+                    containerColor = Color(0xFFFF93BA)
                 ),
                 modifier = Modifier.fillMaxWidth().padding(start=32.dp, end=32.dp).height(94.dp)
             ) {
@@ -139,7 +142,7 @@ fun HomePage(
                 },
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(id = R.color.pink)
+                    containerColor = Color(0xFFFF93BA)
                 ),
                 modifier = Modifier.fillMaxWidth().padding(start=32.dp, end=32.dp).height(94.dp)
             ) {
@@ -164,7 +167,7 @@ fun HomePage(
             }
             Spacer(modifier.height(24.dp))
             Text(text = stringResource(R.string.Menstrual_Phase),
-                color = colorResource(id = R.color.pink), fontSize = 25.sp)
+                color = Color(0xFFFF93BA), fontSize = 25.sp)
             Spacer(modifier.height(24.dp))
             MenstrualRing(
                 periodDay = periodDay,
