@@ -53,162 +53,180 @@ fun TimerScreen(
         }
     }
 
-    Scaffold(
-        bottomBar = { Navbar(navController) } //  added bottom navigation bar
-    ) { paddingValues ->
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
-                .padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Timer title
-            Text(
-                text = stringResource(id = R.string.Timer),
-                fontSize = 48.sp,
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 30.dp, bottom = 110.dp),
-                color = Color.Black,
-                textAlign = TextAlign.Center
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFFFFae8), // Light peach
+                        Color(0xFFFFE1EB), // Light pink
+                        Color(0xFFFFFae8)  // Light peach
+                    )
+                )
             )
+    ) {
+        Scaffold(
+            bottomBar = { Navbar(navController) },
+            containerColor = Color.Transparent // Make scaffold transparent to show gradient
+        ) { paddingValues ->
 
-            // Main box
-            Box(
+            Column(
                 modifier = Modifier
-                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                UterUsPink,
-                                UterUsYellow
-                            )
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(24.dp)
+                    .padding(paddingValues),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(id = R.string.enter_time_label),
-                        fontSize = 20.sp,
-                        modifier = Modifier
-                            .padding(bottom = 16.dp)
-                            .fillMaxWidth(),
-                        color = Color.Black,
-                        textAlign = TextAlign.Center
-                    )
-
-                    // Inputs row
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedTextField(
-                            value = hoursInput,
-                            onValueChange = { if (it.all { c -> c.isDigit() }) hoursInput = it },
-                            label = { Text("Hours") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            singleLine = true,
-                            modifier = Modifier
-                                .padding(bottom = 16.dp)
-                                .width(120.dp)
-                                .background(colorResource(id = R.color.light_pink), RoundedCornerShape(4.dp)),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = colorResource(id = R.color.light_pink),
-                                unfocusedContainerColor = colorResource(id = R.color.light_pink),
-                                disabledContainerColor = colorResource(id = R.color.light_pink),
-                            )
-                        )
-
-                        Spacer(modifier = Modifier.width(30.dp))
-
-                        OutlinedTextField(
-                            value = minutesInput,
-                            onValueChange = { if (it.all { c -> c.isDigit() }) minutesInput = it },
-                            label = { Text("Minutes") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            singleLine = true,
-                            modifier = Modifier
-                                .padding(bottom = 16.dp)
-                                .width(120.dp)
-                                .background(colorResource(id = R.color.light_pink), RoundedCornerShape(4.dp)),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = colorResource(id = R.color.light_pink),
-                                unfocusedContainerColor = colorResource(id = R.color.light_pink),
-                                disabledContainerColor = colorResource(id = R.color.light_pink),
-                            )
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(50.dp))
-
-            // Defaults row
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 32.dp)) {
+                // Timer title
                 Text(
-                    text = "Defaults:",
-                    fontSize = 25.sp,
-                    modifier = Modifier.padding(bottom = 10.dp),
+                    text = stringResource(id = R.string.Timer),
+                    fontSize = 48.sp,
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 30.dp, bottom = 110.dp),
+                    color = Color.Black,
                     textAlign = TextAlign.Center
                 )
-                Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-                    listOf(8L, 4L, 2L).forEach { hrs ->
-                        Button(
-                            onClick = { startTimer(hrs, 0) },
-                            shape = CircleShape,
-                            modifier = Modifier.size(70.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFFF69B4) // Pink color for buttons
-                            )
+
+                // Main box
+                Box(
+                    modifier = Modifier
+                        .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    UterUsPink,
+                                    UterUsYellow
+                                )
+                            ),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = stringResource(id = R.string.enter_time_label),
+                            fontSize = 20.sp,
+                            modifier = Modifier
+                                .padding(bottom = 16.dp)
+                                .fillMaxWidth(),
+                            color = Color.Black,
+                            textAlign = TextAlign.Center
+                        )
+
+                        // Inputs row
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("$hrs h", fontSize = 16.sp)
+                            OutlinedTextField(
+                                value = hoursInput,
+                                onValueChange = { if (it.all { c -> c.isDigit() }) hoursInput = it },
+                                label = { Text("Hours") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                singleLine = true,
+                                modifier = Modifier
+                                    .padding(bottom = 16.dp)
+                                    .width(120.dp)
+                                    .background(colorResource(id = R.color.light_pink), RoundedCornerShape(4.dp)),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = colorResource(id = R.color.light_pink),
+                                    unfocusedContainerColor = colorResource(id = R.color.light_pink),
+                                    disabledContainerColor = colorResource(id = R.color.light_pink),
+                                )
+                            )
+
+                            Spacer(modifier = Modifier.width(30.dp))
+
+                            OutlinedTextField(
+                                value = minutesInput,
+                                onValueChange = { if (it.all { c -> c.isDigit() }) minutesInput = it },
+                                label = { Text("Minutes") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                singleLine = true,
+                                modifier = Modifier
+                                    .padding(bottom = 16.dp)
+                                    .width(120.dp)
+                                    .background(colorResource(id = R.color.light_pink), RoundedCornerShape(4.dp)),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = colorResource(id = R.color.light_pink),
+                                    unfocusedContainerColor = colorResource(id = R.color.light_pink),
+                                    disabledContainerColor = colorResource(id = R.color.light_pink),
+                                )
+                            )
                         }
-                        Spacer(modifier = Modifier.width(24.dp))
                     }
                 }
-            }
 
-            // Countdown display
-            val displayHours = remainingTime / 3600
-            val displayMinutes = (remainingTime % 3600) / 60
-            val displaySeconds = remainingTime % 60
+                Spacer(modifier = Modifier.height(50.dp))
 
-            Text(
-                text = String.format("%02d:%02d:%02d", displayHours, displayMinutes, displaySeconds),
-                fontSize = 64.sp,
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
-                color = Color.Black,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Start/Stop button
-            Button(
-                onClick = {
-                    if (!isRunning) {
-                        startTimer(
-                            hoursInput.toLongOrNull() ?: 0,
-                            minutesInput.toLongOrNull() ?: 0
-                        )
-                    } else {
-                        isRunning = false
+                // Defaults row
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 32.dp)) {
+                    Text(
+                        text = "Defaults:",
+                        fontSize = 30.sp,
+                        modifier = Modifier.padding(bottom = 10.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                        listOf(8L, 4L, 2L).forEach { hrs ->
+                            Button(
+                                onClick = { startTimer(hrs, 0) },
+                                shape = CircleShape,
+                                modifier = Modifier.size(75.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFFF69B4) // Pink color for buttons
+                                )
+                            ) {
+                                Text("$hrs h", fontSize = 16.sp)
+                            }
+                            Spacer(modifier = Modifier.width(24.dp))
+                        }
                     }
-                },
-                modifier = Modifier
-                    .height(56.dp)
-                    .width(180.dp)
-            ) {
-                Text(if (isRunning) "stop" else "start", fontSize = 20.sp)
+                }
+
+                // Countdown display
+                val displayHours = remainingTime / 3600
+                val displayMinutes = (remainingTime % 3600) / 60
+                val displaySeconds = remainingTime % 60
+
+                Text(
+                    text = String.format("%02d:%02d:%02d", displayHours, displayMinutes, displaySeconds),
+                    fontSize = 64.sp,
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Start/Stop button
+                Button(
+                    onClick = {
+                        if (!isRunning) {
+                            startTimer(
+                                hoursInput.toLongOrNull() ?: 0,
+                                minutesInput.toLongOrNull() ?: 0
+                            )
+                        } else {
+                            isRunning = false
+                        }
+                    },
+                    modifier = Modifier
+                        .height(56.dp)
+                        .width(180.dp),
+                            colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFF6489) // Pink color
+                            )
+                ) {
+                    Text(if (isRunning) "stop" else "start", fontSize = 20.sp)
+                }
             }
         }
     }

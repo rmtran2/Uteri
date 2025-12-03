@@ -3,11 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission
         android:name="android.permission.health.WRITE_SKIN_TEMPERATURE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
     </queries>
     <application
+        android:name=".ui.screen.MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
