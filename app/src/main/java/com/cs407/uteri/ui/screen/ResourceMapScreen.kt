@@ -259,7 +259,7 @@ class MyApp : Application() {
         super.onCreate()
 
         if (!Places.isInitialized()) {
-            Places.initialize(this, "YOUR_API_KEY")
+            Places.initialize(this, "MAPS_API_KEY")
         }
     }
 }
