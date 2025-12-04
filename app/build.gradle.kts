@@ -94,6 +94,9 @@ dependencies {
 
     // Health Connect SDK
     implementation("androidx.health.connect:connect-client:1.1.0-alpha11")
+    //notifications
+    implementation("androidx.core:core-ktx:1.10.1")
+
 }
 
 secrets {
