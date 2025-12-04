@@ -19,13 +19,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.cs407.uteri.R
 import com.cs407.uteri.ui.utils.Navbar
-import kotlin.concurrent.timer
 import com.cs407.uteri.ui.theme.UterUsPink
 import com.cs407.uteri.ui.theme.UterUsYellow
 
@@ -38,18 +38,33 @@ fun TimerScreen(
     var minutesInput by remember { mutableStateOf("0") }
     var remainingTime by remember { mutableStateOf(0L) }
     var isRunning by remember { mutableStateOf(false) }
+    var showTimerEndDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+    // Show notification dialog when timer ends
+    if (showTimerEndDialog) {
+        TimerEndDialog(
+            onDismiss = { showTimerEndDialog = false }
+        )
+    }
 
     // Function to start the timer
     fun startTimer(hours: Long, minutes: Long = 0) {
         remainingTime = hours * 3600 + minutes * 60
         isRunning = true
+        showTimerEndDialog = false // Reset dialog when starting new timer
+
         scope.launch {
             while (remainingTime > 0 && isRunning) {
                 delay(1000)
                 remainingTime--
             }
-            isRunning = false
+
+            if (remainingTime == 0L && isRunning) {
+                // Timer completed naturally (not stopped manually)
+                isRunning = false
+                showTimerEndDialog = true
+            }
         }
     }
 
@@ -85,7 +100,7 @@ fun TimerScreen(
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 30.dp, bottom = 110.dp),
+                        .padding(top = 30.dp, bottom = 90.dp),
                     color = Color.Black,
                     textAlign = TextAlign.Center
                 )
@@ -183,7 +198,7 @@ fun TimerScreen(
                             ) {
                                 Text("$hrs h", fontSize = 16.sp)
                             }
-                            Spacer(modifier = Modifier.width(24.dp))
+                            Spacer(modifier = Modifier.width(22.dp))
                         }
                     }
                 }
@@ -221,15 +236,58 @@ fun TimerScreen(
                     modifier = Modifier
                         .height(56.dp)
                         .width(180.dp),
-                            colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFFF6489) // Pink color
-                            )
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFF6489) // Pink color
+                    )
                 ) {
                     Text(if (isRunning) "stop" else "start", fontSize = 20.sp)
                 }
             }
         }
     }
+}
+
+@Composable
+fun TimerEndDialog(
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = Color(0xFFFF6489)
+                )
+            ) {
+                Text("OK", fontSize = 18.sp)
+            }
+        },
+        title = {
+            Text(
+                text = "Timer Complete!",
+                fontSize = 24.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Text(
+                text = "Your timer has finished.",
+                fontSize = 18.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        modifier = Modifier
+            .padding(horizontal = 32.dp)
+            .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp)),
+        containerColor = Color(0xFFFFF0F5), // Light pink background
+        shape = RoundedCornerShape(16.dp),
+        tonalElevation = 0.dp
+    )
 }
 
 //@Preview(showBackground = true)
