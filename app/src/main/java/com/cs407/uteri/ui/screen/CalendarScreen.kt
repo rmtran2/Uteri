@@ -1,5 +1,6 @@
 package com.cs407.uteri.ui.screen
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -71,6 +72,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.PermissionController
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.BasalBodyTemperatureRecord
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.cs407.uteri.R
@@ -91,7 +96,6 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
-    onNavigateBack: () -> Unit,
     navController: NavController
 ) {
     val context = LocalContext.current
@@ -99,7 +103,6 @@ fun CalendarScreen(
     val viewModel: CalendarViewModel = viewModel(
         factory = CalendarViewModelFactory(database)
     )
-    val today = LocalDate.now()
 
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     var showModal by remember { mutableStateOf(false) }
@@ -110,8 +113,23 @@ fun CalendarScreen(
 
     val lastStart = getLastPeriodStart(entries)
     val periodDay = getPeriodDay(lastStart)
-    val nextPeriod = getCyclePrediction(lastStart)
-    val daysUntilNext = daysUntil(nextPeriod)
+
+    // Request for Health Connect Permissions from the user
+    val permissions = setOf(
+        HealthPermission.getReadPermission(BasalBodyTemperatureRecord::class),
+    )
+    val healthConnectClient = HealthConnectClient.getOrCreate(context)
+    val launcher = rememberLauncherForActivityResult(
+        PermissionController.createRequestPermissionResultContract()
+    ) { granted -> // TODO: handle denied permissions?
+      }
+
+    LaunchedEffect(Unit) {
+        val granted = healthConnectClient.permissionController.getGrantedPermissions()
+        if (!granted.containsAll(permissions)) {
+            launcher.launch(permissions)
+        }
+    }
 
     LaunchedEffect(showModal) {
         if (showModal) {
@@ -128,7 +146,7 @@ fun CalendarScreen(
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -685,7 +703,6 @@ private fun LogEntryForm(
 fun CalendarScreenPreview() {
     val navController = rememberNavController()
     CalendarScreen(
-        onNavigateBack = {},
         navController = navController
     )
 }

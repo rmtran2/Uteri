@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -58,121 +61,131 @@ fun HomePage(
     val nextPeriod = getCyclePrediction(lastStart)
     val daysUntilNext = daysUntil(nextPeriod)
 
-    Row(horizontalArrangement = Arrangement.Start,
-        modifier = Modifier.padding(24.dp)){
-        ProfileButton(onNavigateToProfile = onNavigateToProfile)
-    }
-    Box(
-        contentAlignment = Alignment.TopCenter,
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Spacer(modifier.height(48.dp))
-            Image(
-                painter = painterResource(id = R.drawable.uterus_transparent_min),
-                contentDescription = "Logo",
-                modifier = Modifier.size(200.dp)
-            )
-            Spacer(modifier.height(48.dp))
-            Button(
-                onClick = {
-                    onNavigateToCalendar()
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFF93BA)
-                ),
-                modifier = Modifier.fillMaxWidth().padding(start=32.dp, end=32.dp).height(94.dp)
+    Scaffold { padding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.padding(24.dp)
                 ) {
+                    ProfileButton(onNavigateToProfile = onNavigateToProfile)
+                }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Spacer(Modifier.height(48.dp))
                     Image(
-                        painter = painterResource(id = R.drawable.calendar_icon),
-                        contentDescription = "Calendar",
-                        modifier = Modifier.size(40.dp)
+                        painter = painterResource(id = R.drawable.uterus_transparent_min),
+                        contentDescription = "Logo",
+                        modifier = Modifier.size(200.dp)
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column()
-                    {
-                        Text(text = stringResource(R.string.Calendar), fontSize = 18.sp)
-                        Text(text = "Log your period")
+                    Spacer(Modifier.height(48.dp))
+                    Button(
+                        onClick = {
+                            onNavigateToCalendar()
+                        },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFF93BA)
+                        ),
+                        modifier = Modifier.fillMaxWidth().padding(start=32.dp, end=32.dp).height(94.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.calendar_icon),
+                                contentDescription = "Calendar",
+                                modifier = Modifier.size(40.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column()
+                            {
+                                Text(text = stringResource(R.string.Calendar), fontSize = 18.sp)
+                                Text(text = "Log your period")
+                            }
+                        }
                     }
+                    Spacer(Modifier.height(24.dp))
+                    Button(
+                        onClick = {
+                            onNavigateToMap()
+                        },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFF93BA)
+                        ),
+                        modifier = Modifier.fillMaxWidth().padding(start=32.dp, end=32.dp).height(94.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.map_icon),
+                                contentDescription = "Map",
+                                modifier = Modifier.size(40.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column()
+                            {
+                                Text(text = stringResource(R.string.Resource_Map), fontSize = 18.sp)
+                                Text(text = "Find Resources")
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(24.dp))
+                    Button(
+                        onClick = {
+                            onNavigateToTimer()
+                        },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFF93BA)
+                        ),
+                        modifier = Modifier.fillMaxWidth().padding(start=32.dp, end=32.dp).height(94.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.timer_icon),
+                                contentDescription = "Timer",
+                                modifier = Modifier.size(40.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column()
+                            {
+                                Text(text = stringResource(R.string.Timer), fontSize = 18.sp)
+                                Text(text = "Time your period schedule")
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(24.dp))
+                    Text(text = stringResource(R.string.Menstrual_Phase),
+                        color = Color(0xFFFF93BA), fontSize = 25.sp)
+                    Spacer(Modifier.height(24.dp))
+                    MenstrualRing(
+                        periodDay = periodDay,
+                        daysUntilNext = daysUntilNext
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
-            Spacer(modifier.height(24.dp))
-            Button(
-                onClick = {
-                    onNavigateToMap()
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFF93BA)
-                ),
-                modifier = Modifier.fillMaxWidth().padding(start=32.dp, end=32.dp).height(94.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.map_icon),
-                        contentDescription = "Map",
-                        modifier = Modifier.size(40.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column()
-                    {
-                        Text(text = stringResource(R.string.Resource_Map), fontSize = 18.sp)
-                        Text(text = "Find Resources")
-                    }
-                }
-            }
-            Spacer(modifier.height(24.dp))
-            Button(
-                onClick = {
-                    onNavigateToTimer()
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFF93BA)
-                ),
-                modifier = Modifier.fillMaxWidth().padding(start=32.dp, end=32.dp).height(94.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.timer_icon),
-                        contentDescription = "Timer",
-                        modifier = Modifier.size(40.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column()
-                    {
-                        Text(text = stringResource(R.string.Timer), fontSize = 18.sp)
-                        Text(text = "Time your period schedule")
-                    }
-                }
-            }
-            Spacer(modifier.height(24.dp))
-            Text(text = stringResource(R.string.Menstrual_Phase),
-                color = Color(0xFFFF93BA), fontSize = 25.sp)
-            Spacer(modifier.height(24.dp))
-            MenstrualRing(
-                periodDay = periodDay,
-                daysUntilNext = daysUntilNext
-            )
         }
     }
+
 }

@@ -66,7 +66,7 @@ fun AppNavigation(
             )
         }
         composable(Screen.CALENDAR.route) {
-            CalendarScreen ({navController.navigate(Screen.HOME.route)}, navController)
+            CalendarScreen (navController)
         }
         composable(Screen.MAP.route) {
             ResourceMapScreen ({ navController.navigate(Screen.HOME.route)}, navController)
