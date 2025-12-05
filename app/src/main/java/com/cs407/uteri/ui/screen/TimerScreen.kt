@@ -2,9 +2,11 @@ package com.cs407.uteri.ui.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -70,14 +72,14 @@ fun TimerScreen(
             bottomBar = { Navbar(navController) },
             containerColor = Color.Transparent // Make scaffold transparent to show gradient
         ) { paddingValues ->
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp)
-                    .padding(paddingValues),
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(modifier = Modifier.height(24.dp))
                 // Timer title
                 Text(
                     text = stringResource(id = R.string.Timer),
@@ -85,7 +87,8 @@ fun TimerScreen(
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 30.dp, bottom = 110.dp),
+                        .padding(horizontal = 24.dp)
+                        .padding(top = 30.dp, bottom = 50.dp),
                     color = Color.Black,
                     textAlign = TextAlign.Center
                 )
@@ -93,6 +96,8 @@ fun TimerScreen(
                 // Main box
                 Box(
                     modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
                         .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
                         .background(
                             brush = Brush.linearGradient(
@@ -164,7 +169,13 @@ fun TimerScreen(
                 Spacer(modifier = Modifier.height(50.dp))
 
                 // Defaults row
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 32.dp)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 32.dp)
+                ) {
                     Text(
                         text = "Defaults:",
                         fontSize = 30.sp,
@@ -199,6 +210,7 @@ fun TimerScreen(
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
                         .padding(bottom = 24.dp),
                     color = Color.Black,
                     textAlign = TextAlign.Center
@@ -227,6 +239,7 @@ fun TimerScreen(
                 ) {
                     Text(if (isRunning) "stop" else "start", fontSize = 20.sp)
                 }
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }

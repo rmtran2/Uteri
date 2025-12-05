@@ -1,8 +1,12 @@
 package com.cs407.uteri.ui.screen
 
+import android.widget.Toast
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.BasalBodyTemperatureRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs407.uteri.data.Database
 import com.cs407.uteri.data.LogEntry
 import com.cs407.uteri.data.Mood
@@ -16,7 +20,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class CalendarViewModel(
-    private val database: Database
+    database: Database
 ) : ViewModel() {
     private val logEntryDao = database.logEntryDao()
     private val medicationDao = database.userMedicationDao()
@@ -27,13 +31,15 @@ class CalendarViewModel(
     val allEntries: StateFlow<List<LogEntry>> = logEntryDao.getAllEntries()
         .stateIn(
             viewModelScope,
-            kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            SharingStarted.WhileSubscribed(5000),
             emptyList()
         )
 
     init {
         loadMedications()
     }
+
+
 
     private fun loadMedications() {
         viewModelScope.launch {
