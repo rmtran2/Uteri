@@ -1,4 +1,4 @@
-package com.cs407.uteri.ui.screen.settings
+package com.cs407.uteri.data
 
 import androidx.compose.ui.graphics.Color
 
