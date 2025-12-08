@@ -33,17 +33,15 @@ import com.cs407.uteri.ui.screen.TimerViewModel
 @Composable
 fun TimerScreen(
     onNavigateBack: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    viewModel: TimerViewModel
+
 ) {
-
-    val viewModel: TimerViewModel = viewModel()
-
     val hoursInput by viewModel.hoursInput.collectAsState()
     val minutesInput by viewModel.minutesInput.collectAsState()
     val remainingTime by viewModel.remainingTime.collectAsState()
     val isRunning by viewModel.isRunning.collectAsState()
     val showTimerEndDialog by viewModel.showTimerEndDialog.collectAsState()
-
 
     //dialog
     if (showTimerEndDialog) {

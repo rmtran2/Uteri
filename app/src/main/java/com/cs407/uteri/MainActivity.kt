@@ -18,6 +18,7 @@ import com.cs407.uteri.ui.screen.LoginScreen
 import com.cs407.uteri.ui.screen.settings.ProfileSettingsScreen
 import com.cs407.uteri.ui.screen.ResourceMapScreen
 import com.cs407.uteri.ui.screen.TimerScreen
+import com.cs407.uteri.ui.screen.TimerViewModel
 import com.cs407.uteri.ui.screen.settings.ProfileSettingsViewModel
 import com.cs407.uteri.ui.screen.settings.ProfileSettingsViewModelFactory
 import com.cs407.uteri.ui.theme.UteriTheme
@@ -47,6 +48,8 @@ fun AppNavigation(
     val navController = rememberNavController()
     val viewModel: ProfileSettingsViewModel = viewModel(factory = ProfileSettingsViewModelFactory(prefsManager))
     val profileSettings by viewModel.profileSettings.collectAsState()
+    val timerViewModel: TimerViewModel = viewModel()
+
 
     val startDest = when (profileSettings.passwordEnabled) {
         null -> Screen.HOME.route
@@ -72,7 +75,11 @@ fun AppNavigation(
             ResourceMapScreen ({ navController.navigate(Screen.HOME.route)}, navController)
         }
         composable(Screen.TIMER.route) {
-            TimerScreen ({ navController.navigate(Screen.HOME.route) }, navController)
+            TimerScreen(
+                onNavigateBack = { navController.navigate(Screen.HOME.route) },
+                navController = navController,
+                viewModel = timerViewModel
+            )
         }
         composable(Screen.PROFILE.route) {
             ProfileSettingsScreen (prefsManager, { navController.navigate("home") }, navController)
