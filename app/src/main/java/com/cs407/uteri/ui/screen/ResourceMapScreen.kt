@@ -49,6 +49,7 @@ import com.google.android.libraries.places.api.net.SearchNearbyRequest
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import android.location.Geocoder
+import android.util.Log
 import androidx.compose.runtime.snapshotFlow
 import com.cs407.uteri.data.getAbortionLawByState
 import com.cs407.uteri.data.getColorFromCode
@@ -131,7 +132,7 @@ fun ResourceMapScreen(
                 getStateFromLatLng(context, location.latitude, location.longitude)
             }
             currentState = state
-
+            Log.i("Places", "Calls got to launched effect.")
             searchNearbyPlaces(
                 location.latitude,
                 location.longitude,
@@ -213,10 +214,11 @@ private fun searchNearbyPlaces(latitude: Double, longitude: Double, viewModel: M
     )
 
     val request = SearchNearbyRequest.builder(locationRestriction, placeFields)
-        .setIncludedTypes(listOf(PlaceTypes.RESTAURANT))
+        .setIncludedTypes(listOf("health"))
+        .setRankPreference(SearchNearbyRequest.RankPreference.DISTANCE)
         .setMaxResultCount(20)
-        .setPlaceFields(placeFields)
         .build()
+    Log.i("Places", "Request is $request")
 
     placesClient.searchNearby(request)
         .addOnSuccessListener { response ->
