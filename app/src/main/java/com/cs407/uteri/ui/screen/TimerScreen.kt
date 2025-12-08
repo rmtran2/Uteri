@@ -18,37 +18,26 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.cs407.uteri.R
 import com.cs407.uteri.ui.utils.Navbar
 import com.cs407.uteri.ui.theme.UterUsPink
 import com.cs407.uteri.ui.theme.UterUsYellow
-import com.cs407.uteri.ui.screen.TimerViewModel
 
 @Composable
 fun TimerScreen(
     onNavigateBack: () -> Unit,
     navController: NavController,
     viewModel: TimerViewModel
-
 ) {
     val hoursInput by viewModel.hoursInput.collectAsState()
     val minutesInput by viewModel.minutesInput.collectAsState()
     val remainingTime by viewModel.remainingTime.collectAsState()
     val isRunning by viewModel.isRunning.collectAsState()
     val showTimerEndDialog by viewModel.showTimerEndDialog.collectAsState()
-
-    //dialog
-    if (showTimerEndDialog) {
-        TimerEndDialog(
-            onDismiss = { viewModel.dismissDialog() }
-        )
-    }
 
     Box(
         modifier = Modifier
@@ -88,7 +77,7 @@ fun TimerScreen(
                     textAlign = TextAlign.Center
                 )
 
-                // main input box
+                // Main input box
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -163,7 +152,7 @@ fun TimerScreen(
 
                 Spacer(modifier = Modifier.height(50.dp))
 
-                // default buttons
+                // Default buttons
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
@@ -198,7 +187,7 @@ fun TimerScreen(
                     }
                 }
 
-                // countdown display
+                // Countdown display
                 val displayHours = remainingTime / 3600
                 val displayMinutes = (remainingTime % 3600) / 60
                 val displaySeconds = remainingTime % 60
@@ -217,7 +206,7 @@ fun TimerScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                //start/stop button
+                // Start/Stop button
                 Button(
                     onClick = {
                         if (!isRunning) {
@@ -240,47 +229,4 @@ fun TimerScreen(
             }
         }
     }
-}
-
-@Composable
-fun TimerEndDialog(
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = Color(0xFFFF6489)
-                )
-            ) {
-                Text("OK", fontSize = 18.sp)
-            }
-        },
-        title = {
-            Text(
-                text = "Timer Complete!",
-                fontSize = 24.sp,
-                color = Color.Black,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        text = {
-            Text(
-                text = "Your timer has finished.",
-                fontSize = 18.sp,
-                color = Color.Black,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        modifier = Modifier
-            .padding(horizontal = 32.dp)
-            .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp)),
-        containerColor = Color(0xFFFFF0F5),
-        shape = RoundedCornerShape(16.dp),
-        tonalElevation = 0.dp
-    )
 }

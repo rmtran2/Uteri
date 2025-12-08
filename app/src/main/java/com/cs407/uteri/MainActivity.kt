@@ -1,12 +1,11 @@
 package com.cs407.uteri
 
+import com.cs407.uteri.ui.screen.TimerEndDialog
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,7 +34,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             UteriTheme {
-                AppNavigation(prefsManager)
+                // single TimerViewModel instance for the entire app
+                val timerViewModel: TimerViewModel = viewModel()
+                AppNavigation(prefsManager = prefsManager, timerViewModel = timerViewModel)
             }
         }
     }
@@ -43,19 +44,25 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation(
-    prefsManager: ProfileSettingsStorage
+    prefsManager: ProfileSettingsStorage,
+    timerViewModel: TimerViewModel
 ){
     val navController = rememberNavController()
     val viewModel: ProfileSettingsViewModel = viewModel(factory = ProfileSettingsViewModelFactory(prefsManager))
     val profileSettings by viewModel.profileSettings.collectAsState()
-    val timerViewModel: TimerViewModel = viewModel()
-
+    val showTimerDialog by timerViewModel.showTimerEndDialog.collectAsState()
 
     val startDest = when (profileSettings.passwordEnabled) {
         null -> Screen.HOME.route
         true -> Screen.LOGIN.route
         false -> Screen.HOME.route
     }
+
+    // Timer dialog visible globally
+    if (showTimerDialog) {
+        TimerEndDialog(onDismiss = { timerViewModel.dismissDialog() })
+    }
+
     NavHost(
         navController = navController,
         startDestination = startDest
@@ -69,10 +76,10 @@ fun AppNavigation(
             )
         }
         composable(Screen.CALENDAR.route) {
-            CalendarScreen (navController)
+            CalendarScreen(navController)
         }
         composable(Screen.MAP.route) {
-            ResourceMapScreen ({ navController.navigate(Screen.HOME.route)}, navController)
+            ResourceMapScreen({ navController.navigate(Screen.HOME.route)}, navController)
         }
         composable(Screen.TIMER.route) {
             TimerScreen(
@@ -82,14 +89,12 @@ fun AppNavigation(
             )
         }
         composable(Screen.PROFILE.route) {
-            ProfileSettingsScreen (prefsManager, { navController.navigate("home") }, navController)
+            ProfileSettingsScreen(prefsManager, { navController.navigate(Screen.HOME.route) }, navController)
         }
         composable(Screen.LOGIN.route) {
-            LoginScreen(onNavigateToHome = {navController.navigate(Screen.HOME.route)})
+            LoginScreen(onNavigateToHome = { navController.navigate(Screen.HOME.route) })
         }
-
     }
-
 }
 
 enum class Screen(val route: String) {
@@ -98,6 +103,5 @@ enum class Screen(val route: String) {
     TIMER("timer"),
     MAP("map"),
     PROFILE("profile"),
-
     LOGIN("login")
 }
