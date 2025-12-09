@@ -58,14 +58,14 @@ fun MenstrualRing(
 
         // Text inside ring
         when {
-            periodDay != null && periodDay <= 7 ->
+            periodDay != null && periodDay > 0 && periodDay <= 7 ->
                 Text("Period Day $periodDay")
 
             daysUntilNext != null && daysUntilNext >= 0 ->
                 Text("Next in\n$daysUntilNext days")
 
             else ->
-                Text("Cycle\nTracking")
+                Text("No data\nyet")
         }
     }
 }

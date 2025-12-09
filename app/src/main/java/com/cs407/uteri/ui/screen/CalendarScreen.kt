@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -75,12 +77,10 @@ import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
-import androidx.health.connect.client.records.BasalBodyTemperatureRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
-import java.time.ZoneOffset
-import java.time.Instant
+import java.time.ZoneId
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.cs407.uteri.R
@@ -114,6 +114,7 @@ fun CalendarScreen(
     var showModal by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var stepsCount by remember { mutableStateOf<Long?>(null) }
+    var permissionsGranted by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val entries = viewModel.allEntries.collectAsState().value
@@ -123,36 +124,49 @@ fun CalendarScreen(
     val nextPeriod = getCyclePrediction(lastStart)
     val daysUntilNext = daysUntil(nextPeriod)
 
-    // Request for Health Connect Permissions from the user
-    val permissions = setOf(
-        HealthPermission.getReadPermission(BasalBodyTemperatureRecord::class),
-        HealthPermission.getReadPermission(StepsRecord::class),
-    )
-    val healthConnectClient = HealthConnectClient.getOrCreate(context)
+    val healthConnectClient = try {
+        HealthConnectClient.getOrCreate(context)
+    } catch (e: Exception) {
+        null
+    }
+    
+    val stepsPermission = HealthPermission.getReadPermission(StepsRecord::class)
     val launcher = rememberLauncherForActivityResult(
         PermissionController.createRequestPermissionResultContract()
-    ) { granted -> // TODO: handle denied permissions?
-      }
+    ) { 
+        permissionsGranted = true
+    }
 
     LaunchedEffect(Unit) {
+        if (healthConnectClient == null) return@LaunchedEffect
+        
         val granted = healthConnectClient.permissionController.getGrantedPermissions()
-        if (!granted.containsAll(permissions)) {
-            launcher.launch(permissions)
+        permissionsGranted = granted.contains(stepsPermission)
+        if (!granted.contains(stepsPermission)) {
+            launcher.launch(setOf(stepsPermission))
         }
     }
 
-    LaunchedEffect(selectedDate) {
+    LaunchedEffect(selectedDate, permissionsGranted) {
+        if (healthConnectClient == null) {
+            stepsCount = 0
+            return@LaunchedEffect
+        }
+        
         val granted = healthConnectClient.permissionController.getGrantedPermissions()
-        if (granted.contains(HealthPermission.getReadPermission(StepsRecord::class))) {
+        if (granted.contains(stepsPermission)) {
             try {
-                val startOfDay = selectedDate.atStartOfDay(ZoneOffset.UTC).toInstant()
-                val endOfDay = selectedDate.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant()
+                val localZoneId = ZoneId.systemDefault()
+                val startOfDay = selectedDate.atStartOfDay(localZoneId).toInstant()
+                val endOfDay = selectedDate.plusDays(1).atStartOfDay(localZoneId).toInstant()
+                
                 val response = healthConnectClient.readRecords(
                     ReadRecordsRequest(
                         StepsRecord::class,
                         timeRangeFilter = TimeRangeFilter.between(startOfDay, endOfDay)
                     )
                 )
+                
                 stepsCount = response.records.sumOf { it.count }
             } catch (e: Exception) {
                 stepsCount = 0
@@ -180,10 +194,11 @@ fun CalendarScreen(
             }
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
             ) {
                 Spacer(modifier = Modifier.height(15.dp))
                 Row(
@@ -281,17 +296,18 @@ fun CalendarScreen(
                     }
                 }
             }
-        if (showModal) {
-            ModalBottomSheet(
-                onDismissRequest = { showModal = false },
-                sheetState = sheetState,
-                containerColor = Color.White
-            ) {
-                LogEntryForm(
-                    date = selectedDate,
-                    viewModel = viewModel,
-                    onDismiss = { showModal = false }
-                )
+            if (showModal) {
+                ModalBottomSheet(
+                    onDismissRequest = { showModal = false },
+                    sheetState = sheetState,
+                    containerColor = Color.White
+                ) {
+                    LogEntryForm(
+                        date = selectedDate,
+                        viewModel = viewModel,
+                        onDismiss = { showModal = false }
+                    )
+                }
             }
         }
     }
@@ -344,6 +360,7 @@ private fun Calendar(
     ) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
+            modifier = Modifier.height(300.dp)
         ) {
             items(cells) { cell ->
                 Box(
