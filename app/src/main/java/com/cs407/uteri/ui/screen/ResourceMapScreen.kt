@@ -140,23 +140,6 @@ fun ResourceMapScreen(
         }
     }
 
-    LaunchedEffect(cameraPositionState) {
-        snapshotFlow { cameraPositionState.isMoving }
-            .distinctUntilChanged()
-            .collect { isMoving ->
-                if (!isMoving) {
-                    // Camera just stopped — run search
-                    val target = cameraPositionState.position.target
-                    searchNearbyPlaces(
-                        target.latitude,
-                        target.longitude,
-                        viewModel
-                    )
-                }
-            }
-    }
-
-
     var expanded by rememberSaveable { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
     var showAbortionInfo by rememberSaveable { mutableStateOf(false) }
@@ -224,7 +207,7 @@ private fun searchNearbyPlaces(latitude: Double, longitude: Double, viewModel: M
     if (!::placesClient.isInitialized) {
         return
     }
-
+    
     val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
 
     val locationRestriction: LocationRestriction = CircularBounds.newInstance(
@@ -233,7 +216,7 @@ private fun searchNearbyPlaces(latitude: Double, longitude: Double, viewModel: M
     )
 
     val request = SearchNearbyRequest.builder(locationRestriction, placeFields)
-        .setIncludedTypes(listOf("doctor"))
+        .setIncludedTypes(listOf("health"))
         .setRankPreference(SearchNearbyRequest.RankPreference.DISTANCE)
         .setMaxResultCount(20)
         .build()
