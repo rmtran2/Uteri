@@ -22,12 +22,6 @@ class ProfileSettingsViewModel(
             preferencesManager.savePasswordSetting(enabled)
         }
     }
-
-    fun toggleOfflineData(offlineMode: Boolean) {
-        viewModelScope.launch {
-            preferencesManager.saveOfflineSetting(offlineMode)
-        }
-    }
 }
 
 class ProfileSettingsViewModelFactory(
