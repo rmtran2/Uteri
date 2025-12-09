@@ -125,7 +125,6 @@ fun ResourceMapScreen(
     }
 
     LaunchedEffect(uiState.currentLocation) {
-        println("DEBUG — currentState = $currentState")
         uiState.currentLocation?.let { location ->
             cameraPositionState.animate(
                 CameraUpdateFactory.newLatLngZoom(location, 15f),
@@ -142,7 +141,6 @@ fun ResourceMapScreen(
                 location.longitude,
                 viewModel
             )
-
         }
     }
 
@@ -210,11 +208,15 @@ fun ResourceMapScreen(
 }
 
 private fun searchNearbyPlaces(latitude: Double, longitude: Double, viewModel: MapViewModel) {
+    if (!::placesClient.isInitialized) {
+        return
+    }
+    
     val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
 
     val locationRestriction: LocationRestriction = CircularBounds.newInstance(
         LatLng(latitude, longitude),
-        1500.0 // radius in meters
+        1500.0
     )
 
     val request = SearchNearbyRequest.builder(locationRestriction, placeFields)
@@ -233,12 +235,22 @@ private fun searchNearbyPlaces(latitude: Double, longitude: Double, viewModel: M
 }
 
 
+
 class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
-
         if (!Places.isInitialized()) {
-            Places.initialize(this, "MAPS_API_KEY")
+            try {
+                val apiKey = packageManager
+                    .getApplicationInfo(packageName, android.content.pm.PackageManager.GET_META_DATA)
+                    .metaData
+                    ?.getString("com.google.android.geo.API_KEY")
+                if (apiKey != null) {
+                    Places.initialize(this, apiKey)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

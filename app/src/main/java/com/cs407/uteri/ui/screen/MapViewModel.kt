@@ -7,11 +7,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Collections.emptyList
 import java.util.UUID
 
@@ -37,7 +41,7 @@ class MapViewModel : ViewModel() {
         val newMarkers = places.mapNotNull { place ->
             val latLng = place.latLng ?: return@mapNotNull null
             MarkerData(
-                id = place.id ?: "",
+                id = place.id ?: UUID.randomUUID().toString(),
                 name = place.name ?: "Unknown",
                 latLng = latLng
             )
@@ -59,24 +63,34 @@ class MapViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                    if (location != null) {
-                        val latLng = LatLng(location.latitude, location.longitude)
+                val location = withContext(Dispatchers.IO) {
+                    Tasks.await(fusedLocationClient.lastLocation)
+                }
+                if (location != null) {
+                    val latLng = LatLng(location.latitude, location.longitude)
+                    _uiState.value = _uiState.value.copy(
+                        currentLocation = latLng,
+                        isLoading = false
+                    )
+                } else {
+                    val currentLocation = withContext(Dispatchers.IO) {
+                        Tasks.await(fusedLocationClient.getCurrentLocation(
+                            Priority.PRIORITY_HIGH_ACCURACY,
+                            null
+                        ))
+                    }
+                    currentLocation?.let {
+                        val latLng = LatLng(it.latitude, it.longitude)
                         _uiState.value = _uiState.value.copy(
                             currentLocation = latLng,
                             isLoading = false
                         )
-                    } else {
+                    } ?: run {
                         _uiState.value = _uiState.value.copy(
                             error = "Unable to get current location.",
                             isLoading = false
                         )
                     }
-                }.addOnFailureListener { e ->
-                    _uiState.value = _uiState.value.copy(
-                        error = "Failed to get location: ${e.message}",
-                        isLoading = false
-                    )
                 }
             } catch (e: SecurityException) {
                 _uiState.value = _uiState.value.copy(
