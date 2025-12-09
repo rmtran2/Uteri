@@ -147,32 +147,6 @@ fun ProfileSettings1(
         Text("User authentication can always be disabled, but users have this option in " +
                 "order to add another layer of privacy on their health data.", modifier = Modifier.padding(8.dp))
         Spacer(Modifier.padding(16.dp))
-        Image(
-            painter = painterResource(id = R.drawable.cloud_54__1_),
-            contentDescription = "Logo",
-            modifier = Modifier.size(100.dp).align(Alignment.CenterHorizontally)
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-
-            ) {
-                Text(text = "Online Mode", fontWeight = FontWeight.Bold)
-                Text(text = "Store your data on the cloud for easy syncing")
-            }
-            Switch(
-                checked = profileSettings.offlineMode,
-                onCheckedChange = { viewModel.toggleOfflineData(it) },
-            )
-
-        }
-        Text("As a user, you can either choose to store your data online to enable syncing between devices or to store it " +
-                "on your device in order to increase privacy.", modifier = Modifier.padding(8.dp))
-
-        Spacer(Modifier.padding(16.dp))
 
         if(showDialog && !profileSettings.passwordEnabled) {
             AlertDialog(
