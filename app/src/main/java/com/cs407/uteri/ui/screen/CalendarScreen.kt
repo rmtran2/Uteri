@@ -76,6 +76,11 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.BasalBodyTemperatureRecord
+import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.request.ReadRecordsRequest
+import androidx.health.connect.client.time.TimeRangeFilter
+import java.time.ZoneOffset
+import java.time.Instant
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.cs407.uteri.R
@@ -90,6 +95,7 @@ import com.cs407.uteri.ui.utils.getPeriodDay
 import com.cs407.uteri.ui.utils.phaseToText
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -107,16 +113,20 @@ fun CalendarScreen(
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     var showModal by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var stepsCount by remember { mutableStateOf<Long?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val entries = viewModel.allEntries.collectAsState().value
 
     val lastStart = getLastPeriodStart(entries)
     val periodDay = getPeriodDay(lastStart)
+    val nextPeriod = getCyclePrediction(lastStart)
+    val daysUntilNext = daysUntil(nextPeriod)
 
     // Request for Health Connect Permissions from the user
     val permissions = setOf(
         HealthPermission.getReadPermission(BasalBodyTemperatureRecord::class),
+        HealthPermission.getReadPermission(StepsRecord::class),
     )
     val healthConnectClient = HealthConnectClient.getOrCreate(context)
     val launcher = rememberLauncherForActivityResult(
@@ -131,6 +141,27 @@ fun CalendarScreen(
         }
     }
 
+    LaunchedEffect(selectedDate) {
+        val granted = healthConnectClient.permissionController.getGrantedPermissions()
+        if (granted.contains(HealthPermission.getReadPermission(StepsRecord::class))) {
+            try {
+                val startOfDay = selectedDate.atStartOfDay(ZoneOffset.UTC).toInstant()
+                val endOfDay = selectedDate.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant()
+                val response = healthConnectClient.readRecords(
+                    ReadRecordsRequest(
+                        StepsRecord::class,
+                        timeRangeFilter = TimeRangeFilter.between(startOfDay, endOfDay)
+                    )
+                )
+                stepsCount = response.records.sumOf { it.count }
+            } catch (e: Exception) {
+                stepsCount = 0
+            }
+        } else {
+            stepsCount = 0
+        }
+    }
+
     LaunchedEffect(showModal) {
         if (showModal) {
             sheetState.expand()
@@ -141,16 +172,18 @@ fun CalendarScreen(
         bottomBar = { Navbar(navController) },
         containerColor = Color(0xFFFFFae8),
         floatingActionButton = {
-            FloatingActionButton(onClick = { showModal = true }) {
+            FloatingActionButton(onClick = { 
+                selectedDate = LocalDate.now()
+                showModal = true 
+            }) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(padding)
-                .fillMaxWidth()
             ) {
                 Spacer(modifier = Modifier.height(15.dp))
                 Row(
@@ -200,39 +233,14 @@ fun CalendarScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                GradientCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .height(120.dp),
-                    startColor = Color(0xFFFF6489),
-                    endColor = Color(0xFFFFE1EB)
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            val phase = getCyclePhase(periodDay)
-                            val phaseText = phaseToText(phase)
-                            Text(
-                                text = "Current Phase: $phaseText",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
-                                color = Color.White
-                            )
-                        }
-                        Box(
-                            modifier = Modifier.size(80.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CycleProgressView(periodDay = periodDay)
-                        }
-                    }
+                    MenstrualRing(
+                        periodDay = periodDay,
+                        daysUntilNext = daysUntilNext
+                    )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 GradientCard(
@@ -243,9 +251,36 @@ fun CalendarScreen(
                     startColor = Color(0xFFFFe598),
                     endColor = Color(0xFFFFD75F)
                 ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Steps",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = Color.White
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = (stepsCount ?: 0).toString(),
+                                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                                color = Color.White
+                            )
+                            Text(
+                                text = selectedDate.format(DateTimeFormatter.ofPattern("MMM d, yyyy")),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.9f),
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                    }
                 }
             }
-        }
         if (showModal) {
             ModalBottomSheet(
                 onDismissRequest = { showModal = false },
@@ -279,80 +314,6 @@ private fun GradientCard(
             )
     ) {
         content()
-    }
-}
-
-@Composable
-private fun CycleProgressView(
-    periodDay: Int,
-    cycleLength: Int = 28
-) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        val progress = (periodDay.toFloat() / cycleLength.toFloat()).coerceIn(0f, 1f)
-        val sweepAngle = (360f * progress).coerceIn(0f, 360f)
-
-        Canvas(modifier = Modifier
-            .size(80.dp)
-            .align(Alignment.Center)) {
-            val radius = size.minDimension / 2 - 6.dp.toPx()
-            val center = Offset(size.width / 2, size.height / 2)
-            val topLeft = Offset(center.x - radius, center.y - radius)
-            val arcSize = Size(radius * 2, radius * 2)
-            val strokeWidth = 6.dp.toPx()
-            val stroke = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-
-            drawArc(
-                color = Color.White.copy(alpha = 0.3f),
-                startAngle = -90f,
-                sweepAngle = 360f,
-                useCenter = false,
-                topLeft = topLeft,
-                size = arcSize,
-                style = stroke
-            )
-            drawArc(
-                color = Color.White,
-                startAngle = -90f,
-                sweepAngle = sweepAngle,
-                useCenter = false,
-                topLeft = topLeft,
-                size = arcSize,
-                style = stroke
-            )
-        }
-        Box(modifier = Modifier
-            .size(60.dp)
-            .align(Alignment.Center)) {
-            Image(
-                painter = painterResource(id = R.drawable.asterisk),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(0.2f)
-            )
-            Text(
-                text = periodDay.toString(),
-                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .offset(x = (-12).dp, y = (-8).dp),
-                color = Color.White
-            )
-            Text(
-                text = "/",
-                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                modifier = Modifier.align(Alignment.Center),
-                color = Color.White
-            )
-            Text(
-                text = cycleLength.toString(),
-                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .offset(x = 12.dp, y = 8.dp),
-                color = Color.White
-            )
-        }
     }
 }
 
